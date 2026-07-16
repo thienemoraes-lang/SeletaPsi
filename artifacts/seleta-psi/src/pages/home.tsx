@@ -1,7 +1,16 @@
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Logo } from "@/components/Logo"
 import { PsychologistModal } from "@/components/PsychologistModal"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { 
   ArrowRight, 
@@ -19,76 +28,98 @@ import {
   CreditCard,
   Globe,
   Star,
+  SlidersHorizontal,
+  X,
 } from "lucide-react"
 
-// Placeholder avatar component using initials
-function Avatar({ name, color = "#C1694F" }: { name: string; color?: string }) {
-  const initials = name.split(" ").map(n => n[0]).slice(0, 2).join("")
-  return (
-    <div 
-      className="w-full h-full flex items-center justify-center text-white font-bold text-xl"
-      style={{ background: color }}
-    >
-      {initials}
-    </div>
-  )
-}
-
+/* ─── Psychologist data ────────────────────────────────────── */
 const psychologists = [
   {
     name: "Dra. Camila Rezende",
     crp: "CRP: 06/124893",
     line: "Terapia Cognitivo-Comportamental (TCC)",
     specialties: ["Ansiedade", "Depressão", "TOC"],
-    modality: "Online",
-    price: "R$ 70,00",
-    color: "#1B2A4A",
+    modality: "online",
+    modalityLabel: "Online",
+    price: 70,
+    priceLabel: "R$ 70,00",
+    city: "São Paulo",
+    photo: "/psicologos/camila.jpg",
   },
   {
     name: "Dr. Rafael Mendes",
     crp: "CRP: 04/55217",
     line: "Psicanálise",
     specialties: ["Relacionamentos", "Luto", "Autoestima"],
-    modality: "Online / Presencial",
-    price: "R$ 70,00",
-    color: "#6B7F5A",
+    modality: "ambos",
+    modalityLabel: "Online / Presencial",
+    price: 70,
+    priceLabel: "R$ 70,00",
+    city: "Rio de Janeiro",
+    photo: "/psicologos/rafael.jpg",
   },
   {
     name: "Dra. Juliana Farias",
     crp: "CRP: 07/22841",
     line: "Terapia Humanista",
-    specialties: ["Transtornos alimentares", "Ansiedade", "Burnout"],
-    modality: "Online",
-    price: "R$ 70,00",
-    color: "#8B5E52",
+    specialties: ["Ansiedade", "Burnout", "Autoestima"],
+    modality: "online",
+    modalityLabel: "Online",
+    price: 70,
+    priceLabel: "R$ 70,00",
+    city: "Curitiba",
+    photo: "/psicologos/juliana.jpg",
   },
   {
     name: "Dra. Ana Paula Costa",
     crp: "CRP: 05/91032",
     line: "Terapia do Esquema",
     specialties: ["Depressão", "TOC", "Fobia social"],
-    modality: "Online / Presencial",
-    price: "R$ 70,00",
-    color: "#4A6741",
+    modality: "ambos",
+    modalityLabel: "Online / Presencial",
+    price: 70,
+    priceLabel: "R$ 70,00",
+    city: "Belo Horizonte",
+    photo: "/psicologos/ana.jpg",
   },
   {
     name: "Dr. Lucas Brandão",
     crp: "CRP: 08/33105",
     line: "EMDR e Trauma",
     specialties: ["Trauma", "Ansiedade", "Estresse"],
-    modality: "Online",
-    price: "R$ 70,00",
-    color: "#2D4E6B",
+    modality: "online",
+    modalityLabel: "Online",
+    price: 70,
+    priceLabel: "R$ 70,00",
+    city: "Porto Alegre",
+    photo: "/psicologos/lucas.jpg",
   },
   {
     name: "Dra. Fernanda Lopes",
     crp: "CRP: 06/108754",
     line: "Terapia Sistêmica",
-    specialties: ["Família", "Relacionamentos", "Autoestima"],
-    modality: "Online / Presencial",
-    price: "R$ 70,00",
-    color: "#7A5C8A",
+    specialties: ["Relacionamentos", "Família", "Autoestima"],
+    modality: "ambos",
+    modalityLabel: "Online / Presencial",
+    price: 70,
+    priceLabel: "R$ 70,00",
+    city: "São Paulo",
+    photo: "/psicologos/fernanda.jpg",
   },
+]
+
+const ESPECIALIDADES = [
+  "Ansiedade", "Depressão", "Relacionamentos", "Trauma", "Burnout",
+  "Luto", "Autoestima", "TOC", "Fobia social", "Família", "Estresse",
+]
+
+const LINHAS = [
+  "Terapia Cognitivo-Comportamental (TCC)",
+  "Psicanálise",
+  "Terapia Humanista",
+  "Terapia do Esquema",
+  "EMDR e Trauma",
+  "Terapia Sistêmica",
 ]
 
 const ETAPAS = [
@@ -99,18 +130,100 @@ const ETAPAS = [
   { icon: <Globe className="w-5 h-5" />, label: "Publicação", desc: "Seu perfil é publicado automaticamente na plataforma." },
 ]
 
+/* ─── Search form state ────────────────────────────────────── */
+interface SearchFilters {
+  especialidade: string
+  linha: string
+  valor: string
+  modalidade: string
+  cidade: string
+}
+
+const EMPTY_FILTERS: SearchFilters = {
+  especialidade: "", linha: "", valor: "", modalidade: "", cidade: "",
+}
+
+/* ─── Psych photo card ─────────────────────────────────────── */
+function PsychCard({ psy }: { psy: typeof psychologists[0] }) {
+  return (
+    <div className="bg-white rounded-2xl p-6 border border-border/50 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all">
+      <div className="flex items-start gap-4 mb-4">
+        <div className="w-14 h-14 rounded-full overflow-hidden flex-shrink-0 border-2 border-accent shadow-sm">
+          <img src={psy.photo} alt={psy.name} className="w-full h-full object-cover object-top" />
+        </div>
+        <div className="min-w-0">
+          <h4 className="font-bold text-secondary text-base leading-tight">{psy.name}</h4>
+          <p className="text-xs text-foreground/50 mt-0.5">{psy.crp}</p>
+          <p className="text-xs text-primary font-medium mt-1 leading-tight">{psy.line}</p>
+        </div>
+      </div>
+      <div className="flex flex-wrap gap-1.5 mb-4">
+        {psy.specialties.map((s, j) => (
+          <span key={j} className="text-xs bg-accent/70 text-secondary px-2.5 py-1 rounded-full font-medium">
+            {s}
+          </span>
+        ))}
+      </div>
+      <div className="flex items-center justify-between pt-3 border-t border-border/40">
+        <div className="flex items-center gap-1 text-xs text-foreground/50">
+          <MapPin className="w-3 h-3 flex-shrink-0" />
+          <span>{psy.city} • {psy.modalityLabel}</span>
+        </div>
+        <span className="font-bold text-secondary text-sm">{psy.priceLabel}</span>
+      </div>
+    </div>
+  )
+}
+
+/* ─── Main page ────────────────────────────────────────────── */
 export default function Home() {
   const [modalOpen, setModalOpen] = useState(false)
-  
-  const scrollTo = (id: string) => {
-    const el = document.getElementById(id)
-    if (el) el.scrollIntoView({ behavior: 'smooth' })
+  const [filters, setFilters] = useState<SearchFilters>(EMPTY_FILTERS)
+  const [activeFilters, setActiveFilters] = useState<SearchFilters>(EMPTY_FILTERS)
+  const [searched, setSearched] = useState(false)
+
+  const setF = (key: keyof SearchFilters) => (value: string) =>
+    setFilters(f => ({ ...f, [key]: value }))
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    setActiveFilters(filters)
+    setSearched(true)
+    document.getElementById("profissionais")?.scrollIntoView({ behavior: "smooth" })
+  }
+
+  const clearFilters = () => {
+    setFilters(EMPTY_FILTERS)
+    setActiveFilters(EMPTY_FILTERS)
+    setSearched(false)
+  }
+
+  const filtered = useMemo(() => {
+    if (!searched) return psychologists
+    return psychologists.filter(p => {
+      if (activeFilters.especialidade && !p.specialties.some(s => s === activeFilters.especialidade)) return false
+      if (activeFilters.linha && p.line !== activeFilters.linha) return false
+      if (activeFilters.modalidade && activeFilters.modalidade !== "todos") {
+        if (activeFilters.modalidade === "online" && p.modality === "presencial") return false
+        if (activeFilters.modalidade === "presencial" && p.modality === "online") return false
+      }
+      if (activeFilters.cidade && !p.city.toLowerCase().includes(activeFilters.cidade.toLowerCase())) return false
+      if (activeFilters.valor) {
+        const max = parseInt(activeFilters.valor)
+        if (p.price > max) return false
+      }
+      return true
+    })
+  }, [activeFilters, searched])
+
+  const scrollToSearch = () => {
+    document.getElementById("busca")?.scrollIntoView({ behavior: "smooth" })
   }
 
   return (
     <div className="min-h-screen bg-background selection:bg-primary/20 selection:text-secondary font-sans overflow-x-hidden">
       
-      {/* Navigation */}
+      {/* ── Navigation ── */}
       <nav className="fixed top-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-md border-b border-border/50">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <Logo />
@@ -124,12 +237,22 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* Hero Section */}
+      {/* ── Hero ── */}
       <section className="relative pt-40 pb-20 md:pt-52 md:pb-32 px-6 overflow-hidden">
-        <div className="absolute top-0 right-0 w-1/2 h-[600px] bg-accent rounded-bl-full opacity-50 -z-10 blur-3xl transform translate-x-1/3 -translate-y-1/4"></div>
-        <div className="absolute bottom-0 left-0 w-1/3 h-[400px] bg-blue-50 rounded-tr-full opacity-50 -z-10 blur-3xl transform -translate-x-1/3 translate-y-1/4"></div>
+        <div className="absolute top-0 right-0 w-1/2 h-[600px] bg-accent rounded-bl-full opacity-50 -z-10 blur-3xl transform translate-x-1/3 -translate-y-1/4" />
+        <div className="absolute bottom-0 left-0 w-1/3 h-[400px] bg-blue-50 rounded-tr-full opacity-50 -z-10 blur-3xl transform -translate-x-1/3 translate-y-1/4" />
         
         <div className="max-w-4xl mx-auto text-center animate-in fade-in slide-in-from-bottom-8 duration-1000 fill-mode-both">
+          {/* Brand mark above headline */}
+          <div className="flex flex-col items-center gap-3 mb-10">
+            <div className="flex items-center gap-3">
+              <Logo />
+            </div>
+            <p className="text-sm font-medium text-foreground/50 tracking-widest uppercase">
+              Psicologia com curadoria
+            </p>
+          </div>
+
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-secondary leading-[1.1] tracking-tight mb-8">
             Reunimos profissionais selecionados para que você encontre o{" "}
             <span className="text-primary relative whitespace-nowrap">
@@ -143,7 +266,11 @@ export default function Home() {
             Encontrar o psicólogo certo não precisa ser difícil. Conecte-se com especialistas de confiança de forma simples e acolhedora.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button size="lg" className="rounded-full h-14 px-8 text-base shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all hover:-translate-y-0.5 group w-full sm:w-auto" onClick={() => scrollTo('profissionais')}>
+            <Button
+              size="lg"
+              className="rounded-full h-14 px-8 text-base shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all hover:-translate-y-0.5 group w-full sm:w-auto"
+              onClick={scrollToSearch}
+            >
               Encontrar meu psicólogo
               <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Button>
@@ -156,7 +283,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Por que fazer psicoterapia */}
+      {/* ── Por que fazer psicoterapia ── */}
       <section className="py-24 px-6 bg-muted/30 border-y border-border/40">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
@@ -165,44 +292,16 @@ export default function Home() {
               A terapia é um espaço seguro para compreender o que você sente e desenvolver ferramentas para lidar com os desafios da vida.
             </p>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {[
-              {
-                icon: <BrainCircuit className="w-8 h-8 text-primary" />,
-                title: "Ansiedade",
-                desc: "Quando preocupações tomam conta do dia a dia e o corpo reage com tensão constante."
-              },
-              {
-                icon: <CloudFog className="w-8 h-8 text-primary" />,
-                title: "Névoa mental",
-                desc: "Dificuldade de concentrar, memória falha e sensação de estar no piloto automático."
-              },
-              {
-                icon: <BatteryWarning className="w-8 h-8 text-primary" />,
-                title: "Baixa auto-estima",
-                desc: "Quando você se critica demais e sente que não é suficiente."
-              },
-              {
-                icon: <Repeat className="w-8 h-8 text-primary" />,
-                title: "Piloto automático",
-                desc: "Viver sem presença, repetindo padrões sem perceber."
-              },
-              {
-                icon: <Frown className="w-8 h-8 text-primary" />,
-                title: "Humor deprimido",
-                desc: "Falta de energia, tristeza persistente e perda de interesse pelo que antes te movia."
-              },
-              {
-                icon: <HeartHandshake className="w-8 h-8 text-primary" />,
-                title: "Relacionamentos",
-                desc: "Dificuldades em impor limites, conflitos constantes ou dependência emocional."
-              }
+              { icon: <BrainCircuit className="w-8 h-8 text-primary" />, title: "Ansiedade", desc: "Quando preocupações tomam conta do dia a dia e o corpo reage com tensão constante." },
+              { icon: <CloudFog className="w-8 h-8 text-primary" />, title: "Névoa mental", desc: "Dificuldade de concentrar, memória falha e sensação de estar no piloto automático." },
+              { icon: <BatteryWarning className="w-8 h-8 text-primary" />, title: "Baixa auto-estima", desc: "Quando você se critica demais e sente que não é suficiente." },
+              { icon: <Repeat className="w-8 h-8 text-primary" />, title: "Piloto automático", desc: "Viver sem presença, repetindo padrões sem perceber." },
+              { icon: <Frown className="w-8 h-8 text-primary" />, title: "Humor deprimido", desc: "Falta de energia, tristeza persistente e perda de interesse pelo que antes te movia." },
+              { icon: <HeartHandshake className="w-8 h-8 text-primary" />, title: "Relacionamentos", desc: "Dificuldades em impor limites, conflitos constantes ou dependência emocional." },
             ].map((item, i) => (
-              <div 
-                key={i} 
-                className="bg-white rounded-[24px] p-8 shadow-sm border border-border/50 hover:shadow-md transition-all hover:-translate-y-1 group"
-              >
+              <div key={i} className="bg-white rounded-[24px] p-8 shadow-sm border border-border/50 hover:shadow-md transition-all hover:-translate-y-1 group">
                 <div className="w-16 h-16 rounded-2xl bg-accent flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                   {item.icon}
                 </div>
@@ -214,8 +313,129 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Anúncios em destaque */}
-      <section id="profissionais" className="py-24 px-6">
+      {/* ════════════════════════════════════════════════
+          BUSCA DE PSICÓLOGOS
+      ════════════════════════════════════════════════ */}
+      <section id="busca" className="py-20 px-6">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-10">
+            <span className="inline-flex items-center gap-2 text-sm font-semibold text-primary uppercase tracking-widest mb-4 bg-primary/10 px-4 py-1.5 rounded-full">
+              <SlidersHorizontal className="w-4 h-4" /> Pesquisar psicólogos
+            </span>
+            <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-3">Encontre o profissional certo para você</h2>
+            <p className="text-lg text-foreground/70">Use os filtros abaixo para refinar sua busca.</p>
+          </div>
+
+          <form
+            onSubmit={handleSearch}
+            className="bg-white rounded-[28px] border border-border/50 shadow-lg shadow-secondary/5 p-6 md:p-8"
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {/* Especialidade / assunto */}
+              <div className="space-y-1.5">
+                <Label htmlFor="esp">Assunto / especialidade</Label>
+                <Select value={filters.especialidade} onValueChange={setF("especialidade")}>
+                  <SelectTrigger id="esp" className="bg-muted/20">
+                    <SelectValue placeholder="Qualquer assunto" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todos">Qualquer assunto</SelectItem>
+                    {ESPECIALIDADES.map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Linha terapêutica */}
+              <div className="space-y-1.5">
+                <Label htmlFor="linha">Linha terapêutica</Label>
+                <Select value={filters.linha} onValueChange={setF("linha")}>
+                  <SelectTrigger id="linha" className="bg-muted/20">
+                    <SelectValue placeholder="Qualquer abordagem" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todas">Qualquer abordagem</SelectItem>
+                    {LINHAS.map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Valor máximo */}
+              <div className="space-y-1.5">
+                <Label htmlFor="valor">Valor máximo por sessão</Label>
+                <Select value={filters.valor} onValueChange={setF("valor")}>
+                  <SelectTrigger id="valor" className="bg-muted/20">
+                    <SelectValue placeholder="Qualquer valor" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Qualquer valor</SelectItem>
+                    <SelectItem value="50">Até R$ 50,00</SelectItem>
+                    <SelectItem value="70">Até R$ 70,00</SelectItem>
+                    <SelectItem value="100">Até R$ 100,00</SelectItem>
+                    <SelectItem value="150">Até R$ 150,00</SelectItem>
+                    <SelectItem value="999">Sem limite</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Modalidade */}
+              <div className="space-y-1.5">
+                <Label htmlFor="mod">Modalidade de atendimento</Label>
+                <Select value={filters.modalidade} onValueChange={setF("modalidade")}>
+                  <SelectTrigger id="mod" className="bg-muted/20">
+                    <SelectValue placeholder="Online ou presencial" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todos">Online ou presencial</SelectItem>
+                    <SelectItem value="online">Apenas Online</SelectItem>
+                    <SelectItem value="presencial">Apenas Presencial</SelectItem>
+                    <SelectItem value="ambos">Online e Presencial</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Cidade */}
+              <div className="space-y-1.5">
+                <Label htmlFor="cidade">Cidade</Label>
+                <Input
+                  id="cidade"
+                  value={filters.cidade}
+                  onChange={e => setF("cidade")(e.target.value)}
+                  placeholder="Ex: São Paulo"
+                  className="bg-muted/20"
+                />
+              </div>
+
+              {/* Botão */}
+              <div className="flex items-end">
+                <Button type="submit" className="w-full rounded-full h-10 font-semibold gap-2">
+                  <Search className="w-4 h-4" />
+                  Buscar psicólogo
+                </Button>
+              </div>
+            </div>
+
+            {searched && (
+              <div className="mt-4 flex items-center justify-between pt-4 border-t border-border/40">
+                <p className="text-sm text-foreground/60">
+                  <span className="font-semibold text-secondary">{filtered.length}</span> profissional{filtered.length !== 1 ? "is" : ""} encontrado{filtered.length !== 1 ? "s" : ""}
+                </p>
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className="text-sm text-primary hover:underline flex items-center gap-1"
+                >
+                  <X className="w-3.5 h-3.5" /> Limpar filtros
+                </button>
+              </div>
+            )}
+          </form>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════════
+          ANÚNCIOS EM DESTAQUE
+      ════════════════════════════════════════════════ */}
+      <section id="profissionais" className="py-8 pb-24 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <span className="inline-block text-sm font-semibold text-primary uppercase tracking-widest mb-4 bg-primary/10 px-4 py-1.5 rounded-full">
@@ -235,7 +455,11 @@ export default function Home() {
               </svg>
             </div>
             <div className="w-40 h-40 md:w-52 md:h-52 rounded-full overflow-hidden flex-shrink-0 border-8 border-accent shadow-inner">
-              <Avatar name="Marina Oliveira" color="#1B2A4A" />
+              <img
+                src="/psicologos/marina.jpg"
+                alt="Dra. Marina Oliveira"
+                className="w-full h-full object-cover object-top"
+              />
             </div>
             <div className="flex-1 text-center md:text-left z-10">
               <blockquote className="text-xl md:text-2xl font-medium text-secondary mb-8 leading-relaxed">
@@ -250,78 +474,53 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Grid of smaller cards */}
+          {/* Grid */}
           <div className="text-center mb-10">
             <h3 className="text-2xl font-bold text-secondary mb-2">Mais profissionais disponíveis</h3>
             <p className="text-foreground/60">Veja outros psicólogos com vagas e valores acessíveis.</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {psychologists.map((psy, i) => (
-              <div 
-                key={i}
-                className="bg-white rounded-2xl p-6 border border-border/50 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
-              >
-                <div className="flex items-start gap-4 mb-4">
-                  <div className="w-14 h-14 rounded-full overflow-hidden flex-shrink-0 border-2 border-accent shadow-sm">
-                    <Avatar name={psy.name} color={psy.color} />
-                  </div>
-                  <div className="min-w-0">
-                    <h4 className="font-bold text-secondary text-base leading-tight">{psy.name}</h4>
-                    <p className="text-xs text-foreground/50 mt-0.5">{psy.crp}</p>
-                    <p className="text-xs text-primary font-medium mt-1">{psy.line}</p>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-1.5 mb-4">
-                  {psy.specialties.map((s, j) => (
-                    <span key={j} className="text-xs bg-accent/70 text-secondary px-2.5 py-1 rounded-full font-medium">
-                      {s}
-                    </span>
-                  ))}
-                </div>
-                <div className="flex items-center justify-between pt-3 border-t border-border/40">
-                  <div className="flex items-center gap-1 text-xs text-foreground/50">
-                    <MapPin className="w-3 h-3" />
-                    {psy.modality}
-                  </div>
-                  <span className="font-bold text-secondary text-sm">{psy.price}</span>
-                </div>
-              </div>
-            ))}
-          </div>
+
+          {filtered.length === 0 ? (
+            <div className="text-center py-16 text-foreground/50">
+              <Search className="w-10 h-10 mx-auto mb-3 opacity-30" />
+              <p className="font-medium text-secondary">Nenhum profissional encontrado com esses filtros.</p>
+              <button onClick={clearFilters} className="mt-2 text-sm text-primary hover:underline">Limpar filtros</button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filtered.map((psy, i) => <PsychCard key={i} psy={psy} />)}
+            </div>
+          )}
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* ── CTA ── */}
       <section className="py-24 px-6 bg-muted/30 border-y border-border/40">
         <div className="max-w-4xl mx-auto bg-secondary rounded-[32px] p-10 md:p-16 text-center shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2"></div>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2" />
           <div className="relative z-10">
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Pronto para dar o primeiro passo?</h2>
             <p className="text-xl text-white/80 mb-10 max-w-2xl mx-auto">
               Não espere a situação se agravar. O cuidado com a sua saúde mental começa com a escolha de um profissional que te entende.
             </p>
-            <Button size="lg" className="rounded-full h-14 px-10 text-lg bg-primary text-white hover:bg-white hover:text-secondary transition-all shadow-xl">
+            <Button size="lg" onClick={scrollToSearch} className="rounded-full h-14 px-10 text-lg bg-primary text-white hover:bg-white hover:text-secondary transition-all shadow-xl">
               Encontrar meu psicólogo
             </Button>
           </div>
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════
-          SOU PSICÓLOGO — COMO FUNCIONA + PLANOS
-      ═══════════════════════════════════════════════════ */}
+      {/* ════════════════════════════════════════════════
+          SOU PSICÓLOGO
+      ════════════════════════════════════════════════ */}
       <section id="sou-psicologo" className="py-24 px-6">
         <div className="max-w-5xl mx-auto">
-
-          {/* Header */}
           <div className="text-center mb-16">
             <span className="inline-block text-sm font-semibold text-primary uppercase tracking-widest mb-4 bg-primary/10 px-4 py-1.5 rounded-full">
               Para psicólogos
             </span>
-            <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">
-              Amplie seu alcance profissional
-            </h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">Amplie seu alcance profissional</h2>
             <p className="text-lg text-foreground/70 max-w-2xl mx-auto leading-relaxed">
               A Seletapsi conecta psicólogos qualificados com pacientes que buscam um profissional de confiança. Faça parte de uma rede cuidadosamente curada.
             </p>
@@ -330,7 +529,7 @@ export default function Home() {
           {/* Benefícios */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-20">
             {[
-              { icon: "🎯", title: "Curadoria seletiva", desc: "Só profissionais aprovados pela nossa equipe são publicados, o que valoriza quem já está na plataforma." },
+              { icon: "🎯", title: "Curadoria seletiva", desc: "Só profissionais aprovados pela nossa equipe são publicados, valorizando quem já está na plataforma." },
               { icon: "📣", title: "Mais visibilidade", desc: "Seu perfil fica acessível a pacientes que buscam ativamente por psicólogos qualificados." },
               { icon: "💬", title: "Contato direto", desc: "Pacientes entram em contato diretamente com você via WhatsApp, sem intermediários." },
             ].map((b, i) => (
@@ -346,7 +545,6 @@ export default function Home() {
           <div className="mb-20">
             <h3 className="text-2xl font-bold text-secondary text-center mb-10">Como funciona</h3>
             <div className="relative">
-              {/* connecting line */}
               <div className="hidden md:block absolute top-8 left-[10%] right-[10%] h-0.5 bg-border/60 -z-0" />
               <div className="grid grid-cols-1 md:grid-cols-5 gap-6 relative z-10">
                 {ETAPAS.map((et, i) => (
@@ -369,7 +567,6 @@ export default function Home() {
           <div id="planos">
             <h3 className="text-2xl font-bold text-secondary text-center mb-2">Planos de anúncio</h3>
             <p className="text-center text-foreground/60 mb-10">Escolha o plano que melhor se adapta à sua rotina após a aprovação.</p>
-
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
               {/* Mensal */}
               <div className="rounded-2xl border border-border/50 bg-white p-8 flex flex-col gap-5 shadow-sm hover:shadow-md transition-all">
@@ -379,15 +576,9 @@ export default function Home() {
                   <p className="text-sm text-foreground/50 mt-1">por mês</p>
                 </div>
                 <ul className="space-y-2.5 flex-1">
-                  {[
-                    "Perfil ativo por 30 dias",
-                    "Exibição na listagem de psicólogos",
-                    "Renovação mensal flexível",
-                    "Suporte via WhatsApp",
-                  ].map((f, i) => (
+                  {["Perfil ativo por 30 dias", "Exibição na listagem de psicólogos", "Renovação mensal flexível", "Suporte via WhatsApp"].map((f, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm text-foreground/70">
-                      <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                      {f}
+                      <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />{f}
                     </li>
                   ))}
                 </ul>
@@ -397,7 +588,6 @@ export default function Home() {
                   </Button>
                 </PsychologistModal>
               </div>
-
               {/* Trimestral */}
               <div className="rounded-2xl border-2 border-primary bg-primary/5 p-8 flex flex-col gap-5 shadow-lg shadow-primary/10 relative">
                 <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
@@ -411,33 +601,22 @@ export default function Home() {
                   <p className="text-sm text-primary font-semibold mt-1">equivale a R$ 39,00/mês • economia de R$ 30</p>
                 </div>
                 <ul className="space-y-2.5 flex-1">
-                  {[
-                    "Perfil ativo por 90 dias",
-                    "Exibição na listagem de psicólogos",
-                    "Melhor custo-benefício",
-                    "Suporte via WhatsApp",
-                  ].map((f, i) => (
+                  {["Perfil ativo por 90 dias", "Exibição na listagem de psicólogos", "Melhor custo-benefício", "Suporte via WhatsApp"].map((f, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm text-foreground/70">
-                      <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                      {f}
+                      <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />{f}
                     </li>
                   ))}
                 </ul>
                 <PsychologistModal open={modalOpen} onOpenChange={setModalOpen}>
-                  <Button className="w-full rounded-full font-semibold shadow-md shadow-primary/20">
-                    Quero me candidatar
-                  </Button>
+                  <Button className="w-full rounded-full font-semibold shadow-md shadow-primary/20">Quero me candidatar</Button>
                 </PsychologistModal>
               </div>
             </div>
-
-            {/* Important notice */}
             <div className="mt-8 bg-amber-50 border border-amber-200 rounded-2xl p-5 max-w-2xl mx-auto text-sm text-amber-800">
               <strong>Importante:</strong> o preenchimento do formulário não garante o credenciamento imediato. Além de avaliarmos uma série de critérios técnicos, a abertura de novas vagas acontece conforme a demanda de pacientes nas empresas parceiras, para garantir uma jornada de qualidade a quem já está com a gente.
             </div>
           </div>
 
-          {/* CTA */}
           <div className="mt-14 text-center">
             <PsychologistModal open={modalOpen} onOpenChange={setModalOpen}>
               <Button size="lg" className="rounded-full h-14 px-10 text-base shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all hover:-translate-y-0.5 group">
@@ -449,28 +628,19 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Thiene Salazar Partnership Section */}
+      {/* ── Thiene Salazar ── */}
       <section className="py-24 px-6 bg-muted/30 border-t border-border/40">
         <div className="max-w-4xl mx-auto">
           <div className="flex flex-col items-center text-center">
-            {/* Photo */}
             <div className="w-56 h-56 md:w-72 md:h-72 rounded-full overflow-hidden border-8 border-accent shadow-xl mb-8 flex-shrink-0">
-              <img
-                src="/thiene-salazar.jpg"
-                alt="Psicóloga Thiene Salazar"
-                className="w-full h-full object-cover"
-              />
+              <img src="/thiene-salazar.jpg" alt="Psicóloga Thiene Salazar" className="w-full h-full object-cover" />
             </div>
-
-            {/* Bio text */}
             <div className="max-w-2xl">
               <p className="text-lg text-foreground/80 leading-relaxed mb-6">
                 O Seletapsi tem satisfação de ter como parceira a psicóloga{" "}
                 <span className="font-bold text-secondary">Thiene Salazar</span>, psicóloga com 18 anos de experiência na área clínica, mestre em psicologia, tem apresentado contribuições significativas por meio da prática, do conhecimento e de pesquisas no campo científico. Acumula mais de 30 milhões de visualizações nas redes sociais.
               </p>
-
               <p className="text-base font-semibold text-secondary mb-4">Thiene entendeu a nossa visão:</p>
-
               <blockquote className="border-l-4 border-primary pl-6 text-left">
                 <p className="text-lg text-secondary italic leading-relaxed">
                   "Tenho notado uma gama de pessoas serem privadas do acesso à psicoterapia, por outro lado muitos psicólogos reservam horários com valor social. Acredito que a SeletaPsi veio para facilitar esse encontro."
@@ -484,70 +654,53 @@ export default function Home() {
         </div>
       </section>
 
-      {/* FAQ Section */}
+      {/* ── FAQ ── */}
       <section id="faq" className="py-24 px-6 border-t border-border/40">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">Perguntas frequentes</h2>
             <p className="text-foreground/70">Tudo o que você precisa saber sobre como a plataforma funciona.</p>
           </div>
-          
           <div className="bg-white rounded-[24px] p-6 md:p-8 shadow-sm border border-border/50">
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="item-1">
                 <AccordionTrigger>Seleta Psi realiza os atendimentos?</AccordionTrigger>
-                <AccordionContent>
-                  Não. Os atendimentos são realizados exclusivamente pelo psicólogo escolhido pelo paciente. A Seleta Psi é uma plataforma de conexão, não de atendimento.
-                </AccordionContent>
+                <AccordionContent>Não. Os atendimentos são realizados exclusivamente pelo psicólogo escolhido pelo paciente. A Seleta Psi é uma plataforma de conexão, não de atendimento.</AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-2">
                 <AccordionTrigger>O que é a Seleta Psi?</AccordionTrigger>
-                <AccordionContent>
-                  Reunimos psicólogos qualificados com disponibilidade de atendimento e valores acessíveis, facilitando que você encontre o profissional certo para o seu momento.
-                </AccordionContent>
+                <AccordionContent>Reunimos psicólogos qualificados com disponibilidade de atendimento e valores acessíveis, facilitando que você encontre o profissional certo para o seu momento.</AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-3">
                 <AccordionTrigger>A Seleta Psi gerencia os atendimentos?</AccordionTrigger>
-                <AccordionContent>
-                  Não. Os atendimentos são de total responsabilidade do psicólogo escolhido pelo paciente. A plataforma apenas facilita a conexão.
-                </AccordionContent>
+                <AccordionContent>Não. Os atendimentos são de total responsabilidade do psicólogo escolhido pelo paciente. A plataforma apenas facilita a conexão.</AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-4">
                 <AccordionTrigger>O pagamento da sessão é feito para quem?</AccordionTrigger>
-                <AccordionContent>
-                  Diretamente para o psicólogo. A Seleta Psi não intermedia pagamentos entre paciente e profissional.
-                </AccordionContent>
+                <AccordionContent>Diretamente para o psicólogo. A Seleta Psi não intermedia pagamentos entre paciente e profissional.</AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-5">
                 <AccordionTrigger>O atendimento é online ou presencial?</AccordionTrigger>
-                <AccordionContent>
-                  Isso varia de acordo com cada profissional. Ao ver o perfil do psicólogo, você encontra as modalidades disponíveis por ele oferecidas.
-                </AccordionContent>
+                <AccordionContent>Isso varia de acordo com cada profissional. Ao ver o perfil do psicólogo, você encontra as modalidades disponíveis por ele oferecidas.</AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-6">
                 <AccordionTrigger>Existe garantia de disponibilidade?</AccordionTrigger>
-                <AccordionContent>
-                  Não garantimos agenda disponível, pois cada psicólogo gerencia sua própria disponibilidade. Recomendamos entrar em contato com o profissional para verificar horários.
-                </AccordionContent>
+                <AccordionContent>Não garantimos agenda disponível, pois cada psicólogo gerencia sua própria disponibilidade. Recomendamos entrar em contato com o profissional para verificar horários.</AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-7">
                 <AccordionTrigger>Como faço para participar como psicólogo?</AccordionTrigger>
-                <AccordionContent>
-                  Clique no botão "Quero participar", preencha o formulário completo com seus dados e documentos, e aceite os termos. Nossa equipe analisará o perfil e entrará em contato.
-                </AccordionContent>
+                <AccordionContent>Clique no botão "Quero participar", preencha o formulário completo com seus dados e documentos, e aceite os termos. Nossa equipe analisará o perfil e entrará em contato.</AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-8" className="border-b-0">
                 <AccordionTrigger>O preenchimento do formulário garante minha aprovação?</AccordionTrigger>
-                <AccordionContent>
-                  Não. Além de avaliarmos uma série de critérios técnicos, a abertura de novas vagas acontece conforme a demanda de pacientes, para garantir qualidade a todos os profissionais aprovados.
-                </AccordionContent>
+                <AccordionContent>Não. Além de avaliarmos critérios técnicos, a abertura de novas vagas acontece conforme a demanda de pacientes, para garantir qualidade a todos os profissionais aprovados.</AccordionContent>
               </AccordionItem>
             </Accordion>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
+      {/* ── Footer ── */}
       <footer className="bg-white border-t border-border/50 py-12 px-6">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex flex-col items-center md:items-start gap-4">
