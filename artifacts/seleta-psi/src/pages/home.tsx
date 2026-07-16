@@ -36,7 +36,7 @@ import {
 /* ─── Psychologist data ────────────────────────────────────── */
 const psychologists = [
   {
-    name: "Dra. Camila Rezende",
+    name: "Psicóloga Camila Rezende",
     crp: "CRP: 06/124893",
     line: "Terapia Cognitivo-Comportamental (TCC)",
     specialties: ["Ansiedade", "Depressão", "TOC"],
@@ -49,7 +49,7 @@ const psychologists = [
     whatsapp: "5511991230001",
   },
   {
-    name: "Dr. Rafael Mendes",
+    name: "Psicólogo Rafael Mendes",
     crp: "CRP: 04/55217",
     line: "Psicanálise",
     specialties: ["Relacionamentos", "Luto", "Autoestima"],
@@ -62,7 +62,7 @@ const psychologists = [
     whatsapp: "5521992340002",
   },
   {
-    name: "Dra. Juliana Farias",
+    name: "Psicóloga Juliana Farias",
     crp: "CRP: 07/22841",
     line: "Terapia Humanista",
     specialties: ["Ansiedade", "Burnout", "Autoestima"],
@@ -75,7 +75,7 @@ const psychologists = [
     whatsapp: "5541993450003",
   },
   {
-    name: "Dra. Ana Paula Costa",
+    name: "Psicóloga Ana Paula Costa",
     crp: "CRP: 05/91032",
     line: "Terapia do Esquema",
     specialties: ["Depressão", "TOC", "Fobia social"],
@@ -88,7 +88,7 @@ const psychologists = [
     whatsapp: "5531994560004",
   },
   {
-    name: "Dr. Lucas Brandão",
+    name: "Psicólogo Lucas Brandão",
     crp: "CRP: 08/33105",
     line: "EMDR e Trauma",
     specialties: ["Trauma", "Ansiedade", "Estresse"],
@@ -101,7 +101,7 @@ const psychologists = [
     whatsapp: "5551995670005",
   },
   {
-    name: "Dra. Fernanda Lopes",
+    name: "Psicóloga Fernanda Lopes",
     crp: "CRP: 06/108754",
     line: "Terapia Sistêmica",
     specialties: ["Relacionamentos", "Família", "Autoestima"],
@@ -299,11 +299,11 @@ export default function Home() {
       </section>
 
       {/* ── Por que fazer psicoterapia ── */}
-      <section className="py-24 px-6 bg-muted/30 border-y border-border/40">
+      <section className="py-24 px-6 bg-primary">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">Por que fazer psicoterapia?</h2>
-            <p className="text-lg text-foreground/70 max-w-2xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Por que fazer psicoterapia?</h2>
+            <p className="text-lg text-white/80 max-w-2xl mx-auto">
               A terapia é um espaço seguro para compreender o que você sente e desenvolver ferramentas para lidar com os desafios da vida.
             </p>
           </div>
@@ -316,7 +316,7 @@ export default function Home() {
               { icon: <Frown className="w-8 h-8 text-primary" />, title: "Humor deprimido", desc: "Falta de energia, tristeza persistente e perda de interesse pelo que antes te movia." },
               { icon: <HeartHandshake className="w-8 h-8 text-primary" />, title: "Relacionamentos", desc: "Dificuldades em impor limites, conflitos constantes ou dependência emocional." },
             ].map((item, i) => (
-              <div key={i} className="bg-white rounded-[24px] p-8 shadow-sm border border-border/50 hover:shadow-md transition-all hover:-translate-y-1 group">
+              <div key={i} className="bg-white rounded-[24px] p-8 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 group">
                 <div className="w-16 h-16 rounded-2xl bg-accent flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                   {item.icon}
                 </div>
@@ -324,6 +324,16 @@ export default function Home() {
                 <p className="text-foreground/75 leading-relaxed">{item.desc}</p>
               </div>
             ))}
+          </div>
+          <div className="mt-14 text-center">
+            <Button
+              size="lg"
+              onClick={scrollToSearch}
+              className="rounded-full h-14 px-10 text-base bg-white text-primary hover:bg-white/90 shadow-xl font-semibold group"
+            >
+              Quero fazer terapia
+              <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </Button>
           </div>
         </div>
       </section>
@@ -481,14 +491,14 @@ export default function Home() {
                 <i className="italic">"A terapia me permite acompanhar cada pessoa em um momento único de sua história. Ver o movimento de transformação acontecer é o que torna esse trabalho tão significativo."</i>
               </blockquote>
               <div className="space-y-1">
-                <h4 className="font-bold text-xl text-secondary">Dra. Marina Oliveira</h4>
+                <h4 className="font-bold text-xl text-secondary">Psicóloga Marina Oliveira</h4>
                 <p className="text-primary font-medium">Psicóloga Clínica • CRP: 06/198743</p>
                 <p className="text-foreground/60 text-sm">Terapia Cognitivo-Comportamental • Ansiedade, Depressão, Autoestima</p>
                 <p className="text-foreground/60 text-sm">Online / Presencial</p>
               </div>
               <div className="mt-4">
                 <a
-                  href={`https://wa.me/5511997890007?text=${encodeURIComponent("Olá, Dra. Marina! Vi seu perfil na Seletapsi e gostaria de agendar uma conversa.")}`}
+                  href={`https://wa.me/5511997890007?text=${encodeURIComponent("Olá, Marina! Vi seu perfil na Seletapsi e gostaria de agendar uma conversa.")}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 text-sm font-semibold text-white bg-[#25D366] hover:bg-[#20ba5a] px-5 py-2.5 rounded-full transition-colors shadow-md"
@@ -517,6 +527,17 @@ export default function Home() {
               {filtered.map((psy, i) => <PsychCard key={i} psy={psy} />)}
             </div>
           )}
+
+          <div className="mt-14 text-center">
+            <Button
+              size="lg"
+              onClick={scrollToSearch}
+              className="rounded-full h-14 px-10 text-base shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all hover:-translate-y-0.5 group"
+            >
+              Quero fazer terapia
+              <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </Button>
+          </div>
         </div>
       </section>
 
@@ -540,14 +561,14 @@ export default function Home() {
       {/* ════════════════════════════════════════════════
           SOU PSICÓLOGO
       ════════════════════════════════════════════════ */}
-      <section id="sou-psicologo" className="py-24 px-6">
+      <section id="sou-psicologo" className="py-24 px-6 bg-primary">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
-            <span className="inline-block text-sm font-semibold text-primary uppercase tracking-widest mb-4 bg-primary/10 px-4 py-1.5 rounded-full">
+            <span className="inline-block text-sm font-semibold text-white/90 uppercase tracking-widest mb-4 bg-white/20 px-4 py-1.5 rounded-full">
               Para psicólogos
             </span>
-            <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">Amplie seu alcance profissional</h2>
-            <p className="text-lg text-foreground/70 max-w-2xl mx-auto leading-relaxed">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Amplie seu alcance profissional</h2>
+            <p className="text-lg text-white/80 max-w-2xl mx-auto leading-relaxed">
               A Seletapsi conecta psicólogos qualificados com pacientes que buscam um profissional de confiança. Faça parte de uma rede cuidadosamente curada.
             </p>
           </div>
@@ -559,43 +580,43 @@ export default function Home() {
               { icon: "📣", title: "Mais visibilidade", desc: "Seu perfil fica acessível a pacientes que buscam ativamente por psicólogos qualificados." },
               { icon: "💬", title: "Contato direto", desc: "Pacientes entram em contato diretamente com você via WhatsApp, sem intermediários." },
             ].map((b, i) => (
-              <div key={i} className="bg-muted/30 rounded-2xl p-6 border border-border/40 text-center">
+              <div key={i} className="bg-white/15 rounded-2xl p-6 border border-white/20 text-center backdrop-blur-sm">
                 <div className="text-3xl mb-3">{b.icon}</div>
-                <h4 className="font-bold text-secondary mb-2">{b.title}</h4>
-                <p className="text-sm text-foreground/70 leading-relaxed">{b.desc}</p>
+                <h4 className="font-bold text-white mb-2">{b.title}</h4>
+                <p className="text-sm text-white/75 leading-relaxed">{b.desc}</p>
               </div>
             ))}
           </div>
 
           {/* Etapas */}
           <div className="mb-20">
-            <h3 className="text-2xl font-bold text-secondary text-center mb-10">Como funciona</h3>
+            <h3 className="text-2xl font-bold text-white text-center mb-10">Como funciona</h3>
             <div className="relative">
-              <div className="hidden md:block absolute top-8 left-[10%] right-[10%] h-0.5 bg-border/60 -z-0" />
+              <div className="hidden md:block absolute top-8 left-[10%] right-[10%] h-0.5 bg-white/20 -z-0" />
               <div className="grid grid-cols-1 md:grid-cols-5 gap-6 relative z-10">
                 {ETAPAS.map((et, i) => (
                   <div key={i} className="flex flex-col items-center text-center gap-3">
-                    <div className="w-16 h-16 rounded-full bg-white border-2 border-primary/30 shadow-sm flex items-center justify-center text-primary">
+                    <div className="w-16 h-16 rounded-full bg-white/20 border-2 border-white/40 shadow-sm flex items-center justify-center text-white">
                       {et.icon}
                     </div>
-                    <span className="text-xs font-bold text-primary uppercase tracking-wide">
+                    <span className="text-xs font-bold text-white/60 uppercase tracking-wide">
                       {String(i + 1).padStart(2, "0")}
                     </span>
-                    <h4 className="font-bold text-secondary text-sm">{et.label}</h4>
-                    <p className="text-xs text-foreground/60 leading-relaxed">{et.desc}</p>
+                    <h4 className="font-bold text-white text-sm">{et.label}</h4>
+                    <p className="text-xs text-white/65 leading-relaxed">{et.desc}</p>
                   </div>
                 ))}
               </div>
             </div>
           </div>
 
-          <div className="mt-8 bg-amber-50 border border-amber-200 rounded-2xl p-5 max-w-2xl mx-auto text-sm text-amber-800">
-            <strong>Importante:</strong> o preenchimento do formulário não garante o credenciamento imediato. Além de avaliarmos uma série de critérios técnicos, a abertura de novas vagas acontece conforme a demanda de pacientes nas empresas parceiras, para garantir uma jornada de qualidade a quem já está com a gente.
+          <div className="mt-8 bg-white/15 border border-white/25 rounded-2xl p-5 max-w-2xl mx-auto text-sm text-white/85">
+            <strong className="text-white">Importante:</strong> o preenchimento do formulário não garante o credenciamento imediato. Além de avaliarmos uma série de critérios técnicos, a abertura de novas vagas acontece conforme a demanda de pacientes nas empresas parceiras, para garantir uma jornada de qualidade a quem já está com a gente.
           </div>
 
           <div className="mt-14 text-center">
             <PsychologistModal open={modalOpen} onOpenChange={setModalOpen}>
-              <Button size="lg" className="rounded-full h-14 px-10 text-base shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all hover:-translate-y-0.5 group">
+              <Button size="lg" className="rounded-full h-14 px-10 text-base bg-white text-primary hover:bg-white/90 shadow-xl font-semibold group">
                 Enviar minha candidatura
                 <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Button>
