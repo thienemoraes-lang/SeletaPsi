@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "Seleta Psi"
+version = "1.0.0"
+id = "artifacts/seleta-psi"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22650
+
+[services.development]
+run = "pnpm --filter @workspace/seleta-psi run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/seleta-psi", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/seleta-psi/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22650"
+BASE_PATH = "/"
