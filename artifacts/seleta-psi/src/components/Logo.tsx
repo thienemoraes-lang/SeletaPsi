@@ -34,7 +34,7 @@ export function Logo({ className }: { className?: string }) {
         />
       </svg>
       <span className="font-bold text-xl tracking-tight text-secondary" style={{ letterSpacing: "-0.03em" }}>
-        Seleta Psi
+        Seletapsi
       </span>
     </div>
   )
