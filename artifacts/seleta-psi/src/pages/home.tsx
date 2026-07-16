@@ -164,12 +164,11 @@ function PsychCard({ psy }: { psy: typeof psychologists[0] }) {
           </span>
         ))}
       </div>
-      <div className="flex items-center justify-between pt-3 border-t border-border/40">
+      <div className="flex items-center pt-3 border-t border-border/40">
         <div className="flex items-center gap-1 text-xs text-foreground/50">
           <MapPin className="w-3 h-3 flex-shrink-0" />
           <span>{psy.city} • {psy.modalityLabel}</span>
         </div>
-        <span className="font-bold text-secondary text-sm">{psy.priceLabel}</span>
       </div>
     </div>
   )
@@ -563,58 +562,8 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Planos */}
-          <div id="planos">
-            <h3 className="text-2xl font-bold text-secondary text-center mb-2">Planos de anúncio</h3>
-            <p className="text-center text-foreground/60 mb-10">Escolha o plano que melhor se adapta à sua rotina após a aprovação.</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
-              {/* Mensal */}
-              <div className="rounded-2xl border border-border/50 bg-white p-8 flex flex-col gap-5 shadow-sm hover:shadow-md transition-all">
-                <div>
-                  <p className="text-sm font-semibold text-foreground/60 uppercase tracking-wide">Plano Mensal</p>
-                  <p className="text-4xl font-bold text-secondary mt-1">R$ 49<span className="text-lg font-normal text-foreground/50">,00</span></p>
-                  <p className="text-sm text-foreground/50 mt-1">por mês</p>
-                </div>
-                <ul className="space-y-2.5 flex-1">
-                  {["Perfil ativo por 30 dias", "Exibição na listagem de psicólogos", "Renovação mensal flexível", "Suporte via WhatsApp"].map((f, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-foreground/70">
-                      <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />{f}
-                    </li>
-                  ))}
-                </ul>
-                <PsychologistModal open={modalOpen} onOpenChange={setModalOpen}>
-                  <Button variant="outline" className="w-full rounded-full border-secondary text-secondary hover:bg-secondary hover:text-white font-semibold">
-                    Quero me candidatar
-                  </Button>
-                </PsychologistModal>
-              </div>
-              {/* Trimestral */}
-              <div className="rounded-2xl border-2 border-primary bg-primary/5 p-8 flex flex-col gap-5 shadow-lg shadow-primary/10 relative">
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                  <span className="inline-flex items-center gap-1 text-xs font-bold text-white bg-primary px-4 py-1.5 rounded-full shadow">
-                    <Star className="w-3 h-3" /> Mais popular
-                  </span>
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-foreground/60 uppercase tracking-wide">Plano Trimestral</p>
-                  <p className="text-4xl font-bold text-secondary mt-1">R$ 117<span className="text-lg font-normal text-foreground/50">,00</span></p>
-                  <p className="text-sm text-primary font-semibold mt-1">equivale a R$ 39,00/mês • economia de R$ 30</p>
-                </div>
-                <ul className="space-y-2.5 flex-1">
-                  {["Perfil ativo por 90 dias", "Exibição na listagem de psicólogos", "Melhor custo-benefício", "Suporte via WhatsApp"].map((f, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-foreground/70">
-                      <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />{f}
-                    </li>
-                  ))}
-                </ul>
-                <PsychologistModal open={modalOpen} onOpenChange={setModalOpen}>
-                  <Button className="w-full rounded-full font-semibold shadow-md shadow-primary/20">Quero me candidatar</Button>
-                </PsychologistModal>
-              </div>
-            </div>
-            <div className="mt-8 bg-amber-50 border border-amber-200 rounded-2xl p-5 max-w-2xl mx-auto text-sm text-amber-800">
-              <strong>Importante:</strong> o preenchimento do formulário não garante o credenciamento imediato. Além de avaliarmos uma série de critérios técnicos, a abertura de novas vagas acontece conforme a demanda de pacientes nas empresas parceiras, para garantir uma jornada de qualidade a quem já está com a gente.
-            </div>
+          <div className="mt-8 bg-amber-50 border border-amber-200 rounded-2xl p-5 max-w-2xl mx-auto text-sm text-amber-800">
+            <strong>Importante:</strong> o preenchimento do formulário não garante o credenciamento imediato. Além de avaliarmos uma série de critérios técnicos, a abertura de novas vagas acontece conforme a demanda de pacientes nas empresas parceiras, para garantir uma jornada de qualidade a quem já está com a gente.
           </div>
 
           <div className="mt-14 text-center">

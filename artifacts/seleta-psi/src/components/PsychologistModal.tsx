@@ -507,6 +507,46 @@ export function PsychologistModal({
                 <strong>Importante:</strong> o preenchimento não garante o credenciamento imediato. Além de avaliarmos critérios técnicos, a abertura de novas vagas ocorre conforme a demanda de pacientes, para garantir uma jornada de qualidade.
               </div>
 
+              {/* Por que anunciar */}
+              <div className="rounded-2xl bg-secondary/5 border border-secondary/15 p-5 space-y-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">🎯</span>
+                  <h3 className="font-bold text-secondary text-base">Por que anunciar na Seletapsi?</h3>
+                </div>
+                <ul className="space-y-3">
+                  {[
+                    {
+                      icon: "🔍",
+                      title: "Público que já está procurando",
+                      desc: "Seu perfil é exibido para pessoas que estão ativamente buscando psicoterapia — não é publicidade genérica, é visibilidade para quem já quer começar.",
+                    },
+                    {
+                      icon: "📈",
+                      title: "Mais chances de captar clientes",
+                      desc: "Divulgar para o público certo aumenta significativamente a taxa de conversão. Quem chega até você pela Seletapsi já está motivado a iniciar o processo.",
+                    },
+                    {
+                      icon: "✅",
+                      title: "Credibilidade pelo processo seletivo",
+                      desc: "Fazer parte de uma plataforma com curadoria transmite confiança ao paciente e diferencia você de anúncios comuns.",
+                    },
+                    {
+                      icon: "💬",
+                      title: "Suporte próximo",
+                      desc: "Nossa equipe acompanha você via WhatsApp durante todo o processo, do credenciamento ao primeiro contato com pacientes.",
+                    },
+                  ].map((item, i) => (
+                    <li key={i} className="flex gap-3">
+                      <span className="text-lg flex-shrink-0 mt-0.5">{item.icon}</span>
+                      <div>
+                        <p className="text-sm font-semibold text-secondary">{item.title}</p>
+                        <p className="text-xs text-foreground/60 mt-0.5 leading-relaxed">{item.desc}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
               <div>
                 <h3 className="font-bold text-secondary text-lg mb-1">Planos de anúncio</h3>
                 <p className="text-sm text-foreground/60 mb-4">
