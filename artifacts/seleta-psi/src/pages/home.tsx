@@ -12,7 +12,13 @@ import {
   Frown, 
   HeartHandshake,
   MapPin,
-  Star
+  CheckCircle2,
+  FileText,
+  Search,
+  ThumbsUp,
+  CreditCard,
+  Globe,
+  Star,
 } from "lucide-react"
 
 // Placeholder avatar component using initials
@@ -83,6 +89,14 @@ const psychologists = [
     price: "R$ 70,00",
     color: "#7A5C8A",
   },
+]
+
+const ETAPAS = [
+  { icon: <FileText className="w-5 h-5" />, label: "Candidatura", desc: "Preencha o formulário com seus dados e documentos." },
+  { icon: <Search className="w-5 h-5" />, label: "Análise", desc: "Nossa equipe avalia o seu perfil e documentação." },
+  { icon: <ThumbsUp className="w-5 h-5" />, label: "Aprovação", desc: "Você é notificado(a) sobre a aprovação da candidatura." },
+  { icon: <CreditCard className="w-5 h-5" />, label: "Pagamento", desc: "Escolha o plano e realize o pagamento de forma simples." },
+  { icon: <Globe className="w-5 h-5" />, label: "Publicação", desc: "Seu perfil é publicado automaticamente na plataforma." },
 ]
 
 export default function Home() {
@@ -294,8 +308,149 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ═══════════════════════════════════════════════════
+          SOU PSICÓLOGO — COMO FUNCIONA + PLANOS
+      ═══════════════════════════════════════════════════ */}
+      <section id="sou-psicologo" className="py-24 px-6">
+        <div className="max-w-5xl mx-auto">
+
+          {/* Header */}
+          <div className="text-center mb-16">
+            <span className="inline-block text-sm font-semibold text-primary uppercase tracking-widest mb-4 bg-primary/10 px-4 py-1.5 rounded-full">
+              Para psicólogos
+            </span>
+            <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">
+              Amplie seu alcance profissional
+            </h2>
+            <p className="text-lg text-foreground/70 max-w-2xl mx-auto leading-relaxed">
+              A Seletapsi conecta psicólogos qualificados com pacientes que buscam um profissional de confiança. Faça parte de uma rede cuidadosamente curada.
+            </p>
+          </div>
+
+          {/* Benefícios */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-20">
+            {[
+              { icon: "🎯", title: "Curadoria seletiva", desc: "Só profissionais aprovados pela nossa equipe são publicados, o que valoriza quem já está na plataforma." },
+              { icon: "📣", title: "Mais visibilidade", desc: "Seu perfil fica acessível a pacientes que buscam ativamente por psicólogos qualificados." },
+              { icon: "💬", title: "Contato direto", desc: "Pacientes entram em contato diretamente com você via WhatsApp, sem intermediários." },
+            ].map((b, i) => (
+              <div key={i} className="bg-muted/30 rounded-2xl p-6 border border-border/40 text-center">
+                <div className="text-3xl mb-3">{b.icon}</div>
+                <h4 className="font-bold text-secondary mb-2">{b.title}</h4>
+                <p className="text-sm text-foreground/70 leading-relaxed">{b.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Etapas */}
+          <div className="mb-20">
+            <h3 className="text-2xl font-bold text-secondary text-center mb-10">Como funciona</h3>
+            <div className="relative">
+              {/* connecting line */}
+              <div className="hidden md:block absolute top-8 left-[10%] right-[10%] h-0.5 bg-border/60 -z-0" />
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-6 relative z-10">
+                {ETAPAS.map((et, i) => (
+                  <div key={i} className="flex flex-col items-center text-center gap-3">
+                    <div className="w-16 h-16 rounded-full bg-white border-2 border-primary/30 shadow-sm flex items-center justify-center text-primary">
+                      {et.icon}
+                    </div>
+                    <span className="text-xs font-bold text-primary uppercase tracking-wide">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <h4 className="font-bold text-secondary text-sm">{et.label}</h4>
+                    <p className="text-xs text-foreground/60 leading-relaxed">{et.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Planos */}
+          <div id="planos">
+            <h3 className="text-2xl font-bold text-secondary text-center mb-2">Planos de anúncio</h3>
+            <p className="text-center text-foreground/60 mb-10">Escolha o plano que melhor se adapta à sua rotina após a aprovação.</p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
+              {/* Mensal */}
+              <div className="rounded-2xl border border-border/50 bg-white p-8 flex flex-col gap-5 shadow-sm hover:shadow-md transition-all">
+                <div>
+                  <p className="text-sm font-semibold text-foreground/60 uppercase tracking-wide">Plano Mensal</p>
+                  <p className="text-4xl font-bold text-secondary mt-1">R$ 49<span className="text-lg font-normal text-foreground/50">,00</span></p>
+                  <p className="text-sm text-foreground/50 mt-1">por mês</p>
+                </div>
+                <ul className="space-y-2.5 flex-1">
+                  {[
+                    "Perfil ativo por 30 dias",
+                    "Exibição na listagem de psicólogos",
+                    "Renovação mensal flexível",
+                    "Suporte via WhatsApp",
+                  ].map((f, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-foreground/70">
+                      <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <PsychologistModal open={modalOpen} onOpenChange={setModalOpen}>
+                  <Button variant="outline" className="w-full rounded-full border-secondary text-secondary hover:bg-secondary hover:text-white font-semibold">
+                    Quero me candidatar
+                  </Button>
+                </PsychologistModal>
+              </div>
+
+              {/* Trimestral */}
+              <div className="rounded-2xl border-2 border-primary bg-primary/5 p-8 flex flex-col gap-5 shadow-lg shadow-primary/10 relative">
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+                  <span className="inline-flex items-center gap-1 text-xs font-bold text-white bg-primary px-4 py-1.5 rounded-full shadow">
+                    <Star className="w-3 h-3" /> Mais popular
+                  </span>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-foreground/60 uppercase tracking-wide">Plano Trimestral</p>
+                  <p className="text-4xl font-bold text-secondary mt-1">R$ 117<span className="text-lg font-normal text-foreground/50">,00</span></p>
+                  <p className="text-sm text-primary font-semibold mt-1">equivale a R$ 39,00/mês • economia de R$ 30</p>
+                </div>
+                <ul className="space-y-2.5 flex-1">
+                  {[
+                    "Perfil ativo por 90 dias",
+                    "Exibição na listagem de psicólogos",
+                    "Melhor custo-benefício",
+                    "Suporte via WhatsApp",
+                  ].map((f, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-foreground/70">
+                      <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <PsychologistModal open={modalOpen} onOpenChange={setModalOpen}>
+                  <Button className="w-full rounded-full font-semibold shadow-md shadow-primary/20">
+                    Quero me candidatar
+                  </Button>
+                </PsychologistModal>
+              </div>
+            </div>
+
+            {/* Important notice */}
+            <div className="mt-8 bg-amber-50 border border-amber-200 rounded-2xl p-5 max-w-2xl mx-auto text-sm text-amber-800">
+              <strong>Importante:</strong> o preenchimento do formulário não garante o credenciamento imediato. Além de avaliarmos uma série de critérios técnicos, a abertura de novas vagas acontece conforme a demanda de pacientes nas empresas parceiras, para garantir uma jornada de qualidade a quem já está com a gente.
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div className="mt-14 text-center">
+            <PsychologistModal open={modalOpen} onOpenChange={setModalOpen}>
+              <Button size="lg" className="rounded-full h-14 px-10 text-base shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all hover:-translate-y-0.5 group">
+                Enviar minha candidatura
+                <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </PsychologistModal>
+          </div>
+        </div>
+      </section>
+
       {/* Thiene Salazar Partnership Section */}
-      <section className="py-24 px-6">
+      <section className="py-24 px-6 bg-muted/30 border-t border-border/40">
         <div className="max-w-4xl mx-auto">
           <div className="flex flex-col items-center text-center">
             {/* Photo */}
@@ -330,7 +485,7 @@ export default function Home() {
       </section>
 
       {/* FAQ Section */}
-      <section id="faq" className="py-24 px-6 bg-muted/30 border-t border-border/40">
+      <section id="faq" className="py-24 px-6 border-t border-border/40">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">Perguntas frequentes</h2>
@@ -375,10 +530,16 @@ export default function Home() {
                   Não garantimos agenda disponível, pois cada psicólogo gerencia sua própria disponibilidade. Recomendamos entrar em contato com o profissional para verificar horários.
                 </AccordionContent>
               </AccordionItem>
-              <AccordionItem value="item-7" className="border-b-0">
+              <AccordionItem value="item-7">
                 <AccordionTrigger>Como faço para participar como psicólogo?</AccordionTrigger>
                 <AccordionContent>
-                  Clique no botão "Quero participar", preencha o formulário e aceite os termos de uso. Nossa equipe analisará seu perfil e entrará em contato.
+                  Clique no botão "Quero participar", preencha o formulário completo com seus dados e documentos, e aceite os termos. Nossa equipe analisará o perfil e entrará em contato.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="item-8" className="border-b-0">
+                <AccordionTrigger>O preenchimento do formulário garante minha aprovação?</AccordionTrigger>
+                <AccordionContent>
+                  Não. Além de avaliarmos uma série de critérios técnicos, a abertura de novas vagas acontece conforme a demanda de pacientes, para garantir qualidade a todos os profissionais aprovados.
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
