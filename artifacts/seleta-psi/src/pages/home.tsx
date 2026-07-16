@@ -30,6 +30,7 @@ import {
   Star,
   SlidersHorizontal,
   X,
+  MessageCircle,
 } from "lucide-react"
 
 /* ─── Psychologist data ────────────────────────────────────── */
@@ -45,6 +46,7 @@ const psychologists = [
     priceLabel: "R$ 70,00",
     city: "São Paulo",
     photo: "/psicologos/camila.jpg",
+    whatsapp: "5511991230001",
   },
   {
     name: "Dr. Rafael Mendes",
@@ -57,6 +59,7 @@ const psychologists = [
     priceLabel: "R$ 70,00",
     city: "Rio de Janeiro",
     photo: "/psicologos/rafael.jpg",
+    whatsapp: "5521992340002",
   },
   {
     name: "Dra. Juliana Farias",
@@ -69,6 +72,7 @@ const psychologists = [
     priceLabel: "R$ 70,00",
     city: "Curitiba",
     photo: "/psicologos/juliana.jpg",
+    whatsapp: "5541993450003",
   },
   {
     name: "Dra. Ana Paula Costa",
@@ -81,6 +85,7 @@ const psychologists = [
     priceLabel: "R$ 70,00",
     city: "Belo Horizonte",
     photo: "/psicologos/ana.jpg",
+    whatsapp: "5531994560004",
   },
   {
     name: "Dr. Lucas Brandão",
@@ -93,6 +98,7 @@ const psychologists = [
     priceLabel: "R$ 70,00",
     city: "Porto Alegre",
     photo: "/psicologos/lucas.jpg",
+    whatsapp: "5551995670005",
   },
   {
     name: "Dra. Fernanda Lopes",
@@ -105,6 +111,7 @@ const psychologists = [
     priceLabel: "R$ 70,00",
     city: "São Paulo",
     photo: "/psicologos/fernanda.jpg",
+    whatsapp: "5511996780006",
   },
 ]
 
@@ -164,11 +171,20 @@ function PsychCard({ psy }: { psy: typeof psychologists[0] }) {
           </span>
         ))}
       </div>
-      <div className="flex items-center pt-3 border-t border-border/40">
+      <div className="flex items-center justify-between pt-3 border-t border-border/40">
         <div className="flex items-center gap-1 text-xs text-foreground/50">
           <MapPin className="w-3 h-3 flex-shrink-0" />
           <span>{psy.city} • {psy.modalityLabel}</span>
         </div>
+        <a
+          href={`https://wa.me/${psy.whatsapp}?text=${encodeURIComponent("Olá! Vi seu perfil na Seletapsi e gostaria de agendar uma conversa.")}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-white bg-[#25D366] hover:bg-[#20ba5a] px-3 py-1.5 rounded-full transition-colors"
+        >
+          <MessageCircle className="w-3.5 h-3.5" />
+          WhatsApp
+        </a>
       </div>
     </div>
   )
@@ -468,7 +484,18 @@ export default function Home() {
                 <h4 className="font-bold text-xl text-secondary">Dra. Marina Oliveira</h4>
                 <p className="text-primary font-medium">Psicóloga Clínica • CRP: 06/198743</p>
                 <p className="text-foreground/60 text-sm">Terapia Cognitivo-Comportamental • Ansiedade, Depressão, Autoestima</p>
-                <p className="text-foreground/60 text-sm">Online / Presencial — <span className="font-semibold text-secondary">R$ 70,00 / sessão</span></p>
+                <p className="text-foreground/60 text-sm">Online / Presencial</p>
+              </div>
+              <div className="mt-4">
+                <a
+                  href={`https://wa.me/5511997890007?text=${encodeURIComponent("Olá, Dra. Marina! Vi seu perfil na Seletapsi e gostaria de agendar uma conversa.")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-sm font-semibold text-white bg-[#25D366] hover:bg-[#20ba5a] px-5 py-2.5 rounded-full transition-colors shadow-md"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  Falar no WhatsApp
+                </a>
               </div>
             </div>
           </div>
