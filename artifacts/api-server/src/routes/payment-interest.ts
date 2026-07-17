@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { sendWhatsAppNotification } from "../lib/twilio";
+import { sendWhatsAppNotification } from "../lib/notify";
 
 const router: IRouter = Router();
 
