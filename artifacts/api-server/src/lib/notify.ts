@@ -1,34 +1,42 @@
+import nodemailer from "nodemailer";
 import { logger } from "./logger";
 
-const PHONE = "351964797732"; // destination WhatsApp (no +)
+const TO_EMAIL = "thienemoraes@gmail.com";
 
 /**
- * Sends a WhatsApp message via CallMeBot (free, no account needed).
- * Requires CALLMEBOT_API_KEY env var.
- * Docs: https://www.callmebot.com/blog/free-api-whatsapp-messages/
+ * Sends an email notification via Gmail SMTP.
+ * Requires GMAIL_USER and GMAIL_APP_PASSWORD env vars.
+ * Generate an App Password at: https://myaccount.google.com/apppasswords
  */
 export async function sendWhatsAppNotification(message: string): Promise<void> {
-  const apiKey = process.env["CALLMEBOT_API_KEY"];
+  const user = process.env["GMAIL_USER"];
+  const pass = process.env["GMAIL_APP_PASSWORD"];
 
-  if (!apiKey) {
-    logger.warn("CALLMEBOT_API_KEY not configured – skipping WhatsApp notification");
+  if (!user || !pass) {
+    logger.warn("GMAIL_USER / GMAIL_APP_PASSWORD not configured – skipping email notification");
     return;
   }
 
-  const url = new URL("https://api.callmebot.com/whatsapp.php");
-  url.searchParams.set("phone", PHONE);
-  url.searchParams.set("text", message);
-  url.searchParams.set("apikey", apiKey);
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: { user, pass },
+  });
+
+  // Convert the WhatsApp-style message to plain HTML for email readability
+  const html = message
+    .replace(/\*(.*?)\*/g, "<strong>$1</strong>")
+    .replace(/_(.*?)_/g, "<em>$1</em>")
+    .replace(/\n/g, "<br>");
 
   try {
-    const response = await fetch(url.toString());
-    if (!response.ok) {
-      const text = await response.text();
-      logger.error({ status: response.status, body: text }, "CallMeBot send failed");
-    } else {
-      logger.info("WhatsApp notification sent via CallMeBot");
-    }
+    await transporter.sendMail({
+      from: `"Seletapsi" <${user}>`,
+      to: TO_EMAIL,
+      subject: "🆕 Nova candidatura – Seletapsi",
+      html,
+    });
+    logger.info("Email notification sent successfully");
   } catch (err) {
-    logger.error({ err }, "CallMeBot network error");
+    logger.error({ err }, "Email notification failed");
   }
 }
