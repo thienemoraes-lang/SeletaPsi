@@ -1,42 +1,48 @@
-import nodemailer from "nodemailer";
 import { logger } from "./logger";
 
 const TO_EMAIL = "thienemoraes@gmail.com";
 
 /**
- * Sends an email notification via Gmail SMTP.
- * Requires GMAIL_USER and GMAIL_APP_PASSWORD env vars.
- * Generate an App Password at: https://myaccount.google.com/apppasswords
+ * Sends an email notification via Resend (https://resend.com).
+ * Requires RESEND_API_KEY env var.
+ * Free plan: 3 000 emails/month, send from onboarding@resend.dev.
  */
 export async function sendWhatsAppNotification(message: string): Promise<void> {
-  const user = process.env["GMAIL_USER"];
-  const pass = process.env["GMAIL_APP_PASSWORD"];
+  const apiKey = process.env["RESEND_API_KEY"];
 
-  if (!user || !pass) {
-    logger.warn("GMAIL_USER / GMAIL_APP_PASSWORD not configured – skipping email notification");
+  if (!apiKey) {
+    logger.warn("RESEND_API_KEY not configured – skipping email notification");
     return;
   }
 
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: { user, pass },
-  });
-
-  // Convert the WhatsApp-style message to plain HTML for email readability
+  // Convert the *bold* and _italic_ markers to HTML
   const html = message
     .replace(/\*(.*?)\*/g, "<strong>$1</strong>")
     .replace(/_(.*?)_/g, "<em>$1</em>")
     .replace(/\n/g, "<br>");
 
   try {
-    await transporter.sendMail({
-      from: `"Seletapsi" <${user}>`,
-      to: TO_EMAIL,
-      subject: "🆕 Nova candidatura – Seletapsi",
-      html,
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: "Seletapsi <onboarding@resend.dev>",
+        to: [TO_EMAIL],
+        subject: "🆕 Nova candidatura – Seletapsi",
+        html,
+      }),
     });
-    logger.info("Email notification sent successfully");
+
+    if (!response.ok) {
+      const text = await response.text();
+      logger.error({ status: response.status, body: text }, "Resend email failed");
+    } else {
+      logger.info("Email notification sent via Resend");
+    }
   } catch (err) {
-    logger.error({ err }, "Email notification failed");
+    logger.error({ err }, "Resend network error");
   }
 }
