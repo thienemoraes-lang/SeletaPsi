@@ -172,9 +172,15 @@ function PsychCard({ psy }: { psy: typeof psychologists[0] }) {
         ))}
       </div>
       <div className="flex items-center justify-between pt-3 border-t border-border/40">
-        <div className="flex items-center gap-1 text-xs text-foreground/50">
-          <MapPin className="w-3 h-3 flex-shrink-0" />
-          <span>{psy.city} • {psy.modalityLabel}</span>
+        <div className="space-y-0.5">
+          <div className="flex items-center gap-1 text-xs text-foreground/50">
+            <MapPin className="w-3 h-3 flex-shrink-0" />
+            <span>{psy.city} • {psy.modalityLabel}</span>
+          </div>
+          <div className="flex items-center gap-1 text-xs font-semibold text-primary">
+            <CreditCard className="w-3 h-3 flex-shrink-0" />
+            <span>{psy.priceLabel}/sessão</span>
+          </div>
         </div>
         <a
           href={`https://wa.me/${psy.whatsapp}?text=${encodeURIComponent("Olá! Vi seu perfil na Seletapsi e gostaria de agendar uma conversa.")}`}
