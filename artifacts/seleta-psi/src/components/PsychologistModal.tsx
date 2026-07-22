@@ -21,7 +21,7 @@ import {
 import { CheckCircle2, Upload, Loader2, ChevronRight, Star } from "lucide-react"
 
 /* ─── Types ───────────────────────────────────────────────── */
-type Step = "form" | "plans" | "plan-success"
+type Step = "intro" | "form" | "plans" | "plan-success"
 
 interface FormData {
   nome: string; cpf: string; crp: string; estado_crp: string
@@ -175,7 +175,7 @@ export function PsychologistModal({
   open?: boolean
   onOpenChange?: (open: boolean) => void
 }) {
-  const [step, setStep] = useState<Step>("form")
+  const [step, setStep] = useState<Step>("intro")
   const [form, setForm] = useState<FormData>(EMPTY_FORM)
   const [agreedTerms, setAgreedTerms] = useState(false)
   const [agreedLGPD, setAgreedLGPD] = useState(false)
@@ -269,6 +269,7 @@ export function PsychologistModal({
         <div className="px-6 py-5 border-b border-border/40 bg-muted/30 sticky top-0 z-10">
           <DialogHeader>
             <DialogTitle className="text-xl text-secondary font-bold">
+              {step === "intro" && "Faça parte da Seletapsi"}
               {step === "form" && "Candidatura para psicólogo(a)"}
               {step === "plans" && "Candidatura enviada! Conheça os planos"}
               {step === "plan-success" && "Interesse registrado!"}
@@ -278,6 +279,86 @@ export function PsychologistModal({
 
         {/* ── Body ── */}
         <div className="overflow-y-auto max-h-[76vh]">
+
+          {/* ══ STEP: INTRO ══ */}
+          {step === "intro" && (
+            <div className="p-6 space-y-6">
+
+              {/* Hero stat */}
+              <div className="rounded-2xl bg-gradient-to-br from-secondary to-secondary/80 text-white p-6 text-center space-y-2">
+                <p className="text-4xl font-extrabold tracking-tight">+1.000.000</p>
+                <p className="text-white/80 text-sm leading-snug">
+                  pessoas buscam o psicólogo ideal na Seletapsi <strong className="text-white">todo mês</strong>.
+                  <br />O próximo paciente pode estar procurando exatamente por você.
+                </p>
+              </div>
+
+              {/* Benefits */}
+              <div className="space-y-3">
+                <p className="font-bold text-secondary text-base">Por que anunciar na Seletapsi?</p>
+                {[
+                  {
+                    icon: "🎯",
+                    title: "Público que já decidiu começar",
+                    desc: "Seu perfil é exibido para pessoas que estão ativamente buscando psicoterapia — não é publicidade genérica, é visibilidade qualificada.",
+                  },
+                  {
+                    icon: "📈",
+                    title: "Mais conversão, menos esforço",
+                    desc: "Quem chega até você pela Seletapsi já está motivado. Isso significa mais chance de agendamento com menos trabalho de captação.",
+                  },
+                  {
+                    icon: "✅",
+                    title: "Credibilidade pela curadoria",
+                    desc: "Fazer parte de uma plataforma seletiva transmite confiança ao paciente e diferencia você de anúncios comuns.",
+                  },
+                  {
+                    icon: "💬",
+                    title: "Suporte próximo via WhatsApp",
+                    desc: "Nossa equipe acompanha você do credenciamento ao primeiro contato com pacientes.",
+                  },
+                ].map((item, i) => (
+                  <div key={i} className="flex gap-3 p-3 rounded-xl bg-muted/30 border border-border/40">
+                    <span className="text-xl flex-shrink-0">{item.icon}</span>
+                    <div>
+                      <p className="text-sm font-semibold text-secondary">{item.title}</p>
+                      <p className="text-xs text-foreground/60 mt-0.5 leading-relaxed">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Plan pricing */}
+              <div className="space-y-3">
+                <p className="font-bold text-secondary text-base">Planos de anúncio</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-2xl border-2 border-border/50 p-4 text-center space-y-1">
+                    <p className="text-xs font-semibold text-foreground/50 uppercase tracking-wide">Mensal</p>
+                    <p className="text-2xl font-extrabold text-secondary">R$ 49</p>
+                    <p className="text-xs text-foreground/50">por mês</p>
+                  </div>
+                  <div className="rounded-2xl border-2 border-primary p-4 text-center space-y-1 relative">
+                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full">MAIS POPULAR</span>
+                    <p className="text-xs font-semibold text-primary uppercase tracking-wide">Trimestral</p>
+                    <p className="text-2xl font-extrabold text-secondary">R$ 117</p>
+                    <p className="text-xs text-foreground/50">≈ R$ 39/mês · economize R$ 30</p>
+                  </div>
+                </div>
+                <p className="text-xs text-center text-foreground/40">
+                  O pagamento é realizado após aprovação da candidatura.
+                </p>
+              </div>
+
+              {/* CTA */}
+              <Button
+                size="lg"
+                className="w-full font-semibold h-12 text-[15px] rounded-full"
+                onClick={() => setStep("form")}
+              >
+                Quero me candidatar <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+            </div>
+          )}
 
           {/* ══ STEP: FORM ══ */}
           {step === "form" && (
@@ -487,6 +568,25 @@ export function PsychologistModal({
                   </div>
                 </div>
               </section>
+
+              {/* Submit button */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+                <p className="text-xs text-foreground/50 text-center sm:text-left">
+                  Campos com <span className="text-primary font-semibold">*</span> são obrigatórios
+                </p>
+                <Button
+                  type="submit"
+                  disabled={submitting || !agreedTerms || !agreedLGPD}
+                  size="lg"
+                  className="w-full sm:w-auto font-semibold px-8 h-12 text-[15px] rounded-full"
+                >
+                  {submitting ? (
+                    <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Enviando...</>
+                  ) : (
+                    <>Enviar candidatura <ChevronRight className="w-4 h-4 ml-1" /></>
+                  )}
+                </Button>
+              </div>
             </form>
           )}
 
@@ -610,27 +710,6 @@ export function PsychologistModal({
           )}
         </div>
 
-        {/* ── Footer ── */}
-        {step === "form" && (
-          <div className="p-5 border-t border-border/40 bg-muted/10 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-xs text-foreground/50 text-center sm:text-left">
-              Campos com <span className="text-primary font-semibold">*</span> são obrigatórios
-            </p>
-            <Button
-              type="submit"
-              form="candidatura-form"
-              disabled={submitting || !agreedTerms || !agreedLGPD}
-              size="lg"
-              className="w-full sm:w-auto font-semibold px-8 h-12 text-[15px] rounded-full"
-            >
-              {submitting ? (
-                <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Enviando...</>
-              ) : (
-                <>Enviar candidatura <ChevronRight className="w-4 h-4 ml-1" /></>
-              )}
-            </Button>
-          </div>
-        )}
       </DialogContent>
     </Dialog>
   )
