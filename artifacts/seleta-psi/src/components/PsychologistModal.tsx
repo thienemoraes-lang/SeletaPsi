@@ -286,10 +286,12 @@ export function PsychologistModal({
 
               {/* Hero stat */}
               <div className="rounded-2xl bg-gradient-to-br from-secondary to-secondary/80 text-white p-6 text-center space-y-2">
-                <p className="text-4xl font-extrabold tracking-tight">+1.000.000</p>
+                <p className="text-2xl font-extrabold tracking-tight leading-snug">
+                  Milhares de visualizações mensais
+                </p>
                 <p className="text-white/80 text-sm leading-snug">
-                  pessoas buscam o psicólogo ideal na Seletapsi <strong className="text-white">todo mês</strong>.
-                  <br />O próximo paciente pode estar procurando exatamente por você.
+                  pelo público certo — pessoas que já estão procurando ativamente pelo seu serviço.
+                  <br /><strong className="text-white">O próximo paciente pode estar buscando exatamente por você.</strong>
                 </p>
               </div>
 
