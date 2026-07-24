@@ -4,7 +4,6 @@ import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
 import { getUncachableStripeClient } from "./lib/stripeClient";
-import { getStripeSync } from "./lib/stripeClient";
 import { db, candidaturasTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 
@@ -28,32 +27,32 @@ app.post(
   async (req, res) => {
     const signature = req.headers["stripe-signature"];
     if (!signature) { res.status(400).json({ error: "Missing stripe-signature" }); return; }
+
     try {
+      const stripe = await getUncachableStripeClient();
       const sig = Array.isArray(signature) ? signature[0] : signature;
 
-      // 1. stripe-replit-sync syncs data to DB
-      const sync = await getStripeSync();
-      await sync.processWebhook(req.body as Buffer, sig);
+      // Parse the event (without webhook secret verification in dev; add STRIPE_WEBHOOK_SECRET for prod)
+      let event: { type: string; data: { object: Record<string, unknown> } };
+      const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+      if (webhookSecret) {
+        event = stripe.webhooks.constructEvent(req.body as Buffer, sig, webhookSecret) as typeof event;
+      } else {
+        event = JSON.parse((req.body as Buffer).toString()) as typeof event;
+      }
 
-      // 2. Custom: handle checkout.session.completed → activate profile
-      try {
-        const stripe = await getUncachableStripeClient();
-        const event = stripe.webhooks.constructEvent(req.body as Buffer, sig, "");
-        if (event.type === "checkout.session.completed") {
-          const session = event.data.object as { metadata?: Record<string, string> };
-          const candidaturaId = session.metadata?.candidatura_id;
-          if (candidaturaId) {
-            const id = parseInt(candidaturaId, 10);
-            if (!isNaN(id)) {
-              await db.update(candidaturasTable)
-                .set({ status: "ativo", pagamento_status: "pago", atualizado_em: new Date() })
-                .where(eq(candidaturasTable.id, id));
-              logger.info({ candidaturaId }, "Pagamento confirmado — perfil ativado");
-            }
+      if (event.type === "checkout.session.completed") {
+        const session = event.data.object as { metadata?: Record<string, string> };
+        const candidaturaId = session.metadata?.candidatura_id;
+        if (candidaturaId) {
+          const id = parseInt(candidaturaId, 10);
+          if (!isNaN(id)) {
+            await db.update(candidaturasTable)
+              .set({ status: "ativo", pagamento_status: "pago", atualizado_em: new Date() })
+              .where(eq(candidaturasTable.id, id));
+            logger.info({ candidaturaId }, "Pagamento confirmado — perfil ativado");
           }
         }
-      } catch {
-        // webhookSecret may not be available in dev — skip custom event parsing
       }
 
       res.status(200).json({ received: true });
