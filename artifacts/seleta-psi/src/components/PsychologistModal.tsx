@@ -182,6 +182,7 @@ export function PsychologistModal({
   const [submitting, setSubmitting] = useState(false)
   const [planLoading, setPlanLoading] = useState<string | null>(null)
   const [chosenPlan, setChosenPlan] = useState("")
+  const [candidaturaId, setCandidaturaId] = useState<number | null>(null)
 
   // file names for WhatsApp notification
   const [fotoPerfil, setFotoPerfil] = useState("")
@@ -197,11 +198,13 @@ export function PsychologistModal({
 
   const handleClose = (v: boolean) => {
     if (!v) {
-      setStep("form")
+      setStep("intro")
       setForm(EMPTY_FORM)
       setAgreedTerms(false)
       setAgreedLGPD(false)
       setFotoPerfil(""); setDiploma(""); setComprovantes(""); setDocCRP("")
+      setCandidaturaId(null)
+      setChosenPlan("")
     }
     onOpenChange?.(v)
   }
@@ -216,7 +219,7 @@ export function PsychologistModal({
 
     setSubmitting(true)
     try {
-      await fetch("/api/candidatura", {
+      const res = await fetch("/api/candidatura", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -229,8 +232,12 @@ export function PsychologistModal({
           ].filter(Boolean).join(" | "),
         }),
       })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.id) setCandidaturaId(data.id)
+      }
     } catch {
-      // Notification may fail silently; submission still proceeds
+      // silent
     } finally {
       setSubmitting(false)
       setStep("plans")
@@ -240,16 +247,14 @@ export function PsychologistModal({
   const handlePlanInterest = async (plano: string) => {
     setPlanLoading(plano)
     try {
-      await fetch("/api/payment-interest", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nome: form.nome,
-          email: form.email,
-          whatsapp: form.whatsapp,
-          plano,
-        }),
-      })
+      // Save plan preference on the candidatura record
+      if (candidaturaId) {
+        await fetch(`/api/candidatura/${candidaturaId}/plano`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ plano }),
+        })
+      }
     } catch {
       // silent
     } finally {

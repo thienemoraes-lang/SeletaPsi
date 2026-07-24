@@ -26,6 +26,9 @@ interface Candidatura {
   curriculo: string | null
   instagram: string | null
   site: string | null
+  plano: string | null
+  stripe_payment_link: string | null
+  pagamento_status: string | null
   status: string
   criado_em: string
 }
@@ -38,6 +41,16 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.
   },
   aprovado: {
     label: "Aprovado",
+    color: "bg-blue-100 text-blue-800 border-blue-200",
+    icon: <CheckCircle2 className="w-3.5 h-3.5" />,
+  },
+  aguardando_pagamento: {
+    label: "Aguardando pagamento",
+    color: "bg-orange-100 text-orange-800 border-orange-200",
+    icon: <Clock className="w-3.5 h-3.5" />,
+  },
+  ativo: {
+    label: "Ativo ✓",
     color: "bg-green-100 text-green-800 border-green-200",
     icon: <CheckCircle2 className="w-3.5 h-3.5" />,
   },
@@ -82,6 +95,11 @@ function CandidaturaCard({
           <div className="flex items-center gap-3 flex-wrap">
             <h3 className="font-bold text-secondary text-base leading-tight">{c.nome}</h3>
             <StatusBadge status={c.status} />
+            {c.plano && (
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-secondary/10 text-secondary border border-secondary/20">
+                {c.plano === "trimestral" ? "Trimestral — R$ 117" : "Mensal — R$ 49"}
+              </span>
+            )}
           </div>
           <p className="text-xs text-foreground/50 mt-1">
             CRP {c.crp}{c.estado_crp ? `/${c.estado_crp}` : ""} · {c.email} · {date}
@@ -91,34 +109,36 @@ function CandidaturaCard({
               {c.cidade}{c.estado ? `, ${c.estado}` : ""} · {c.modalidade ?? "-"} · {c.valor_sessao ?? "-"}
             </p>
           )}
+          {c.stripe_payment_link && c.status === "aguardando_pagamento" && (
+            <a href={c.stripe_payment_link} target="_blank" rel="noopener noreferrer"
+               className="text-xs text-primary underline mt-0.5 inline-block">
+              🔗 Link de pagamento Stripe
+            </a>
+          )}
+          {c.pagamento_status && c.pagamento_status !== "nenhum" && (
+            <p className="text-xs text-foreground/40 mt-0.5">
+              Pagamento: {c.pagamento_status === "pago" ? "✅ Confirmado" : c.pagamento_status === "link_enviado" ? "📧 Link enviado" : c.pagamento_status}
+            </p>
+          )}
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           {c.status === "pendente" && (
             <>
-              <Button
-                size="sm"
-                variant="outline"
+              <Button size="sm" variant="outline"
                 className="text-red-600 border-red-200 hover:bg-red-50 h-8 text-xs"
-                onClick={() => onReject(c.id)}
-              >
+                onClick={() => onReject(c.id)}>
                 <XCircle className="w-3.5 h-3.5 mr-1" /> Rejeitar
               </Button>
-              <Button
-                size="sm"
-                className="bg-green-600 hover:bg-green-700 h-8 text-xs"
-                onClick={() => onApprove(c.id)}
-              >
-                <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Aprovar
+              <Button size="sm" className="bg-green-600 hover:bg-green-700 h-8 text-xs"
+                onClick={() => onApprove(c.id)}>
+                <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Aprovar + Cobrar
               </Button>
             </>
           )}
-          {c.status !== "pendente" && (
-            <Button
-              size="sm"
-              variant="outline"
+          {(c.status === "rejeitado" || c.status === "ativo") && (
+            <Button size="sm" variant="outline"
               className="text-foreground/50 h-8 text-xs"
-              onClick={() => onDelete(c.id)}
-            >
+              onClick={() => onDelete(c.id)}>
               <Trash2 className="w-3.5 h-3.5 mr-1" /> Excluir
             </Button>
           )}
@@ -174,7 +194,7 @@ export default function Admin() {
   const [authError, setAuthError] = useState("")
   const [candidaturas, setCandidaturas] = useState<Candidatura[]>([])
   const [loading, setLoading] = useState(false)
-  const [filter, setFilter] = useState<"todos" | "pendente" | "aprovado" | "rejeitado">("todos")
+  const [filter, setFilter] = useState<"todos" | "pendente" | "aguardando_pagamento" | "aprovado" | "ativo" | "rejeitado">("todos")
   const [actionLoading, setActionLoading] = useState<number | null>(null)
 
   const headers = { "x-admin-password": password }
@@ -240,6 +260,8 @@ export default function Admin() {
   const counts = {
     todos: candidaturas.length,
     pendente: candidaturas.filter((c) => c.status === "pendente").length,
+    aguardando_pagamento: candidaturas.filter((c) => c.status === "aguardando_pagamento").length,
+    ativo: candidaturas.filter((c) => c.status === "ativo").length,
     aprovado: candidaturas.filter((c) => c.status === "aprovado").length,
     rejeitado: candidaturas.filter((c) => c.status === "rejeitado").length,
   }
@@ -316,7 +338,7 @@ export default function Admin() {
       <div className="max-w-5xl mx-auto px-4 py-6 space-y-5">
         {/* Stats + filter */}
         <div className="flex flex-wrap gap-2">
-          {(["todos", "pendente", "aprovado", "rejeitado"] as const).map((s) => (
+          {(["todos", "pendente", "aguardando_pagamento", "ativo", "aprovado", "rejeitado"] as const).map((s) => (
             <button
               key={s}
               onClick={() => setFilter(s)}
@@ -326,7 +348,7 @@ export default function Admin() {
                   : "bg-white text-foreground/60 border-border/50 hover:border-secondary/40"
               }`}
             >
-              {s === "todos" ? "Todas" : STATUS_CONFIG[s]?.label}
+              {s === "todos" ? "Todas" : (STATUS_CONFIG[s]?.label ?? s)}
               <span className={`ml-2 text-xs px-1.5 py-0.5 rounded-full ${filter === s ? "bg-white/20 text-white" : "bg-muted text-foreground/50"}`}>
                 {counts[s]}
               </span>

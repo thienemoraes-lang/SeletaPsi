@@ -25,7 +25,12 @@ export const candidaturasTable = pgTable("candidaturas", {
   curriculo: text("curriculo"),
   documentos: text("documentos"),
   foto_url: text("foto_url"),
+  plano: varchar("plano", { length: 20 }), // "mensal" | "trimestral"
   status: varchar("status", { length: 20 }).notNull().default("pendente"),
+  // "pendente" | "aprovado" | "rejeitado" | "aguardando_pagamento" | "ativo"
+  stripe_customer_id: varchar("stripe_customer_id", { length: 100 }),
+  stripe_payment_link: text("stripe_payment_link"),
+  pagamento_status: varchar("pagamento_status", { length: 30 }).default("nenhum"),
   criado_em: timestamp("criado_em").defaultNow(),
   atualizado_em: timestamp("atualizado_em").defaultNow(),
 });
