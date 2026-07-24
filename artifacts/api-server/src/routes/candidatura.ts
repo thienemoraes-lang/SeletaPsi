@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import { db, candidaturasTable } from "@workspace/db";
 import { sendWhatsAppNotification } from "../lib/notify";
 
 const router: IRouter = Router();
@@ -34,11 +35,39 @@ router.post("/candidatura", async (req, res): Promise<void> => {
 
   req.log.info({ nome, crp, email }, "Nova candidatura recebida");
 
-  const docsLine =
-    documentos
-      ? `\n*Documentos enviados:* ${documentos}`
-      : "";
+  // Save to database
+  try {
+    await db.insert(candidaturasTable).values({
+      nome,
+      cpf,
+      crp,
+      estado_crp,
+      telefone,
+      whatsapp,
+      email,
+      cidade,
+      estado,
+      instagram,
+      site,
+      modalidade,
+      valor_sessao,
+      abordagem,
+      especialidades,
+      tempo_experiencia,
+      formacao,
+      especializacoes_detalhe,
+      curriculo,
+      documentos,
+    });
+    req.log.info({ nome, crp }, "Candidatura salva no banco de dados");
+  } catch (err) {
+    req.log.error(err, "Erro ao salvar candidatura no banco");
+    res.status(500).json({ error: "Erro ao salvar candidatura" });
+    return;
+  }
 
+  // Send email notification (non-blocking)
+  const docsLine = documentos ? `\n*Documentos enviados:* ${documentos}` : "";
   const message =
     `🆕 *Nova candidatura – Seletapsi*\n\n` +
     `*Nome:* ${nome}\n` +
@@ -59,9 +88,11 @@ router.post("/candidatura", async (req, res): Promise<void> => {
     `*Site:* ${site ?? "-"}\n` +
     `*Currículo:* ${curriculo ? curriculo.slice(0, 300) + (curriculo.length > 300 ? "…" : "") : "-"}` +
     docsLine +
-    `\n\n_Revise a candidatura e entre em contato com o psicólogo(a)._`;
+    `\n\n_Acesse o painel admin para aprovar ou rejeitar._`;
 
-  await sendWhatsAppNotification(message);
+  sendWhatsAppNotification(message).catch((err) =>
+    req.log.error(err, "Falha ao enviar notificação")
+  );
 
   res.status(201).json({ ok: true, message: "Candidatura recebida com sucesso" });
 });

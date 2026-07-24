@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Logo } from "@/components/Logo"
 import { PsychologistModal } from "@/components/PsychologistModal"
 import { Button } from "@/components/ui/button"
@@ -33,87 +33,25 @@ import {
   MessageCircle,
 } from "lucide-react"
 
-/* ─── Psychologist data ────────────────────────────────────── */
-const psychologists = [
-  {
-    name: "Psicóloga Camila Rezende",
-    crp: "CRP: 06/124893",
-    line: "Terapia Cognitivo-Comportamental (TCC)",
-    specialties: ["Ansiedade", "Depressão", "TOC"],
-    modality: "online",
-    modalityLabel: "Online",
-    price: 70,
-    priceLabel: "R$ 70,00",
-    city: "São Paulo",
-    photo: "/psicologos/camila.jpg",
-    whatsapp: "5511991230001",
-  },
-  {
-    name: "Psicólogo Rafael Mendes",
-    crp: "CRP: 04/55217",
-    line: "Psicanálise",
-    specialties: ["Relacionamentos", "Luto", "Autoestima"],
-    modality: "ambos",
-    modalityLabel: "Online / Presencial",
-    price: 70,
-    priceLabel: "R$ 70,00",
-    city: "Rio de Janeiro",
-    photo: "/psicologos/rafael.jpg",
-    whatsapp: "5521992340002",
-  },
-  {
-    name: "Psicóloga Juliana Farias",
-    crp: "CRP: 07/22841",
-    line: "Terapia Humanista",
-    specialties: ["Ansiedade", "Burnout", "Autoestima"],
-    modality: "online",
-    modalityLabel: "Online",
-    price: 70,
-    priceLabel: "R$ 70,00",
-    city: "Curitiba",
-    photo: "/psicologos/juliana.jpg",
-    whatsapp: "5541993450003",
-  },
-  {
-    name: "Psicóloga Ana Paula Costa",
-    crp: "CRP: 05/91032",
-    line: "Terapia do Esquema",
-    specialties: ["Depressão", "TOC", "Fobia social"],
-    modality: "ambos",
-    modalityLabel: "Online / Presencial",
-    price: 70,
-    priceLabel: "R$ 70,00",
-    city: "Belo Horizonte",
-    photo: "/psicologos/ana.jpg",
-    whatsapp: "5531994560004",
-  },
-  {
-    name: "Psicólogo Lucas Brandão",
-    crp: "CRP: 08/33105",
-    line: "EMDR e Trauma",
-    specialties: ["Trauma", "Ansiedade", "Estresse"],
-    modality: "online",
-    modalityLabel: "Online",
-    price: 70,
-    priceLabel: "R$ 70,00",
-    city: "Porto Alegre",
-    photo: "/psicologos/lucas.jpg",
-    whatsapp: "5551995670005",
-  },
-  {
-    name: "Psicóloga Fernanda Lopes",
-    crp: "CRP: 06/108754",
-    line: "Terapia Sistêmica",
-    specialties: ["Relacionamentos", "Família", "Autoestima"],
-    modality: "ambos",
-    modalityLabel: "Online / Presencial",
-    price: 70,
-    priceLabel: "R$ 70,00",
-    city: "São Paulo",
-    photo: "/psicologos/fernanda.jpg",
-    whatsapp: "5511996780006",
-  },
-]
+const BASE = import.meta.env.BASE_URL.replace(/\/$/, "")
+
+/* ─── Psychologist type (from API) ────────────────────────── */
+interface Psicologo {
+  id: number
+  nome: string
+  crp: string
+  estado_crp: string | null
+  cidade: string | null
+  estado: string | null
+  modalidade: string | null
+  valor_sessao: string | null
+  abordagem: string | null
+  especialidades: string[]
+  whatsapp: string
+  instagram: string | null
+  site: string | null
+  foto_url: string | null
+}
 
 const ESPECIALIDADES = [
   "Ansiedade", "Depressão", "Relacionamentos", "Trauma", "Burnout",
@@ -151,39 +89,54 @@ const EMPTY_FILTERS: SearchFilters = {
 }
 
 /* ─── Psych photo card ─────────────────────────────────────── */
-function PsychCard({ psy }: { psy: typeof psychologists[0] }) {
+function modalityLabel(m: string | null) {
+  if (m === "online") return "Online"
+  if (m === "presencial") return "Presencial"
+  if (m === "ambos") return "Online / Presencial"
+  return m ?? "-"
+}
+
+function PsychCard({ psy }: { psy: Psicologo }) {
+  const crpLabel = psy.estado_crp ? `CRP: ${psy.crp}/${psy.estado_crp}` : `CRP: ${psy.crp}`
+  const photo = psy.foto_url ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(psy.nome)}&background=e8f0f7&color=1a3a5c&size=128`
   return (
     <div className="bg-white rounded-2xl p-6 border border-border/50 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all">
       <div className="flex items-start gap-4 mb-4">
         <div className="w-14 h-14 rounded-full overflow-hidden flex-shrink-0 border-2 border-accent shadow-sm">
-          <img src={psy.photo} alt={psy.name} className="w-full h-full object-cover object-top" />
+          <img src={photo} alt={psy.nome} className="w-full h-full object-cover object-top" />
         </div>
         <div className="min-w-0">
-          <h4 className="font-bold text-secondary text-base leading-tight">{psy.name}</h4>
-          <p className="text-xs text-foreground/50 mt-0.5">{psy.crp}</p>
-          <p className="text-xs text-primary font-medium mt-1 leading-tight">{psy.line}</p>
+          <h4 className="font-bold text-secondary text-base leading-tight">{psy.nome}</h4>
+          <p className="text-xs text-foreground/50 mt-0.5">{crpLabel}</p>
+          {psy.abordagem && (
+            <p className="text-xs text-primary font-medium mt-1 leading-tight">{psy.abordagem}</p>
+          )}
         </div>
       </div>
-      <div className="flex flex-wrap gap-1.5 mb-4">
-        {psy.specialties.map((s, j) => (
-          <span key={j} className="text-xs bg-accent/70 text-secondary px-2.5 py-1 rounded-full font-medium">
-            {s}
-          </span>
-        ))}
-      </div>
+      {psy.especialidades.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-4">
+          {psy.especialidades.map((s, j) => (
+            <span key={j} className="text-xs bg-accent/70 text-secondary px-2.5 py-1 rounded-full font-medium">
+              {s}
+            </span>
+          ))}
+        </div>
+      )}
       <div className="flex items-center justify-between pt-3 border-t border-border/40">
         <div className="space-y-0.5">
           <div className="flex items-center gap-1 text-xs text-foreground/50">
             <MapPin className="w-3 h-3 flex-shrink-0" />
-            <span>{psy.city} • {psy.modalityLabel}</span>
+            <span>{psy.cidade ?? "-"} • {modalityLabel(psy.modalidade)}</span>
           </div>
-          <div className="flex items-center gap-1 text-xs font-semibold text-primary">
-            <CreditCard className="w-3 h-3 flex-shrink-0" />
-            <span>{psy.priceLabel}/sessão</span>
-          </div>
+          {psy.valor_sessao && (
+            <div className="flex items-center gap-1 text-xs font-semibold text-primary">
+              <CreditCard className="w-3 h-3 flex-shrink-0" />
+              <span>{psy.valor_sessao}/sessão</span>
+            </div>
+          )}
         </div>
         <a
-          href={`https://wa.me/${psy.whatsapp}?text=${encodeURIComponent("Olá! Vi seu perfil na Seletapsi e gostaria de agendar uma conversa.")}`}
+          href={`https://wa.me/${psy.whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent("Olá! Vi seu perfil na Seletapsi e gostaria de agendar uma conversa.")}`}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-white bg-[#25D366] hover:bg-[#20ba5a] px-3 py-1.5 rounded-full transition-colors"
@@ -202,6 +155,16 @@ export default function Home() {
   const [filters, setFilters] = useState<SearchFilters>(EMPTY_FILTERS)
   const [activeFilters, setActiveFilters] = useState<SearchFilters>(EMPTY_FILTERS)
   const [searched, setSearched] = useState(false)
+  const [psicologos, setPsicologos] = useState<Psicologo[]>([])
+  const [loadingPsis, setLoadingPsis] = useState(true)
+
+  useEffect(() => {
+    fetch(`${BASE}/api/psicologos`)
+      .then(r => r.json())
+      .then(data => setPsicologos(Array.isArray(data) ? data : []))
+      .catch(() => setPsicologos([]))
+      .finally(() => setLoadingPsis(false))
+  }, [])
 
   const setF = (key: keyof SearchFilters) => (value: string) =>
     setFilters(f => ({ ...f, [key]: value }))
@@ -220,22 +183,23 @@ export default function Home() {
   }
 
   const filtered = useMemo(() => {
-    if (!searched) return psychologists
-    return psychologists.filter(p => {
-      if (activeFilters.especialidade && !p.specialties.some(s => s === activeFilters.especialidade)) return false
-      if (activeFilters.linha && p.line !== activeFilters.linha) return false
+    if (!searched) return psicologos
+    return psicologos.filter(p => {
+      if (activeFilters.especialidade && !p.especialidades.some(s => s === activeFilters.especialidade)) return false
+      if (activeFilters.linha && p.abordagem !== activeFilters.linha) return false
       if (activeFilters.modalidade && activeFilters.modalidade !== "todos") {
-        if (activeFilters.modalidade === "online" && p.modality === "presencial") return false
-        if (activeFilters.modalidade === "presencial" && p.modality === "online") return false
+        if (activeFilters.modalidade === "online" && p.modalidade === "presencial") return false
+        if (activeFilters.modalidade === "presencial" && p.modalidade === "online") return false
       }
-      if (activeFilters.cidade && !p.city.toLowerCase().includes(activeFilters.cidade.toLowerCase())) return false
-      if (activeFilters.valor) {
+      if (activeFilters.cidade && !(p.cidade ?? "").toLowerCase().includes(activeFilters.cidade.toLowerCase())) return false
+      if (activeFilters.valor && p.valor_sessao) {
         const max = parseInt(activeFilters.valor)
-        if (p.price > max) return false
+        const val = parseInt(p.valor_sessao.replace(/\D/g, ""))
+        if (!isNaN(val) && !isNaN(max) && val > max) return false
       }
       return true
     })
-  }, [activeFilters, searched])
+  }, [activeFilters, searched, psicologos])
 
   const scrollToSearch = () => {
     document.getElementById("busca")?.scrollIntoView({ behavior: "smooth" })
@@ -528,9 +492,28 @@ export default function Home() {
               <p className="font-medium text-secondary">Nenhum profissional encontrado com esses filtros.</p>
               <button onClick={clearFilters} className="mt-2 text-sm text-primary hover:underline">Limpar filtros</button>
             </div>
+          ) : loadingPsis ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="bg-white rounded-2xl p-6 border border-border/50 animate-pulse space-y-4">
+                  <div className="flex gap-4">
+                    <div className="w-14 h-14 rounded-full bg-muted flex-shrink-0" />
+                    <div className="flex-1 space-y-2 pt-1">
+                      <div className="h-4 bg-muted rounded w-3/4" />
+                      <div className="h-3 bg-muted rounded w-1/2" />
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <div className="h-6 bg-muted rounded-full w-20" />
+                    <div className="h-6 bg-muted rounded-full w-16" />
+                  </div>
+                  <div className="h-8 bg-muted rounded-full w-28 ml-auto" />
+                </div>
+              ))}
+            </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filtered.map((psy, i) => <PsychCard key={i} psy={psy} />)}
+              {filtered.map((psy) => <PsychCard key={psy.id} psy={psy} />)}
             </div>
           )}
 
